@@ -1,5 +1,5 @@
-import Footer from "@/components/footer";
 import { FirestoreJob, getJobById, getJobs } from "@/lib/services/jobsService";
+import Footer from "@/components/footer";
 import {
   ArrowLeft,
   Briefcase,
@@ -12,6 +12,19 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
+// Generate static params for all job pages
+export async function generateStaticParams() {
+  // Fetch all jobs to generate static pages
+  const jobs = await getJobs();
+  
+  // Return an array of job IDs for static generation
+  return jobs.map((job) => ({
+    jobId: job.id,
+  }));
+}
+
+export const dynamicParams = true; // Fallback to server-side rendering for non-generated pages
 
 // Define a type for the job data we expect from Firestore
 type JobDetails = FirestoreJob & {

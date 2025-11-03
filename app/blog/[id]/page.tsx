@@ -2,6 +2,21 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { Clock, User, Calendar } from "lucide-react"
 
+// Generate static params for all blog posts
+export async function generateStaticParams() {
+  // Return an array of all possible blog post IDs
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' },
+    { id: '4' },
+    { id: '5' },
+    { id: '6' },
+  ];
+}
+
+export const dynamicParams = false; // Return 404 for non-existent blog posts
+
 const blogContent: Record<number, any> = {
   1: {
     title: "Top 10 Skills Employers Look for in 2025",

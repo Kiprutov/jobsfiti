@@ -3,6 +3,20 @@ import { ArrowLeft } from "lucide-react";
 import Footer from "@/components/footer";
 import GuideContent from "./GuideContent";
 
+// Generate static params for all guide pages
+export async function generateStaticParams() {
+  // Return an array of all possible guide IDs
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' },
+    { id: '4' },
+    { id: '5' },
+  ];
+}
+
+export const dynamicParams = false; // Return 404 for non-existent guides
+
 const guideContent: Record<number, any> = {
   1: {
     title: "How to Write a Winning Resume",
