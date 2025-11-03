@@ -1,6 +1,5 @@
 'use client';
 
-import Footer from "@/components/footer"
 import Link from "next/link"
 import { Clock, ArrowRight } from "lucide-react"
 
@@ -93,7 +92,7 @@ export default function BlogPage() {
               <Link
                 key={post.id}
                 href={`/blog/${post.id}`}
-                className="bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200 group"
+                className="bg-white border border-slate-200 rounded-md overflow-hidden hover:shadow-sm transition-shadow duration-200 group"
               >
                 <div className="overflow-hidden h-48 bg-slate-200">
                 <img
@@ -125,7 +124,6 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <Footer />
     </main>
     </div>
   )

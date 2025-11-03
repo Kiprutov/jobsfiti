@@ -1,4 +1,3 @@
-import Footer from "@/components/footer"
 import { CheckCircle2 } from "lucide-react"
 
 export default function AboutPage() {
@@ -110,8 +109,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </main>
   )
 }

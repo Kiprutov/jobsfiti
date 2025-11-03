@@ -1,4 +1,8 @@
-import { FirestoreJob, getJobById, getJobs } from "@/lib/services/jobsService";
+"use client";
+
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { FirestoreJob, getJobById } from "@/lib/services/jobsService";
 import Footer from "@/components/footer";
 import {
   ArrowLeft,
@@ -8,23 +12,10 @@ import {
   DollarSign,
   MapPin,
   Users,
+  Loader2
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-
-// Generate static params for all job pages
-export async function generateStaticParams() {
-  // Fetch all jobs to generate static pages
-  const jobs = await getJobs();
-  
-  // Return an array of job IDs for static generation
-  return jobs.map((job) => ({
-    jobId: job.id,
-  }));
-}
-
-export const dynamicParams = true; // Fallback to server-side rendering for non-generated pages
 
 // Define a type for the job data we expect from Firestore
 type JobDetails = FirestoreJob & {
@@ -66,11 +57,6 @@ type JobDetails = FirestoreJob & {
   };
 };
 
-interface JobDetailsPageProps {
-  params: { jobId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
 // Helper function to format date
 const formatDate = (dateString?: string) => {
   if (!dateString) return "N/A";
@@ -82,32 +68,85 @@ const formatDate = (dateString?: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-export default async function JobDetailsPage({
-  params,
-  searchParams,
-}: JobDetailsPageProps) {
-  console.log("Job ID from URL params:", params.jobId);
-  console.log("Search params:", searchParams);
+export default function JobDetailsPage() {
+  const router = useRouter();
+  const params = useParams();
+  const [job, setJob] = useState<JobDetails | null>(null);
+  const [similarJobs, setSimilarJobs] = useState<FirestoreJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const jobId = params?.jobId ? String(params.jobId) : "";
 
-  // Ensure jobId is a string and handle potential undefined
-  const jobId = params.jobId ? String(params.jobId) : "";
+  // Fetch job details
+  useEffect(() => {
+    if (!jobId) {
+      setError("No job ID provided");
+      setLoading(false);
+      return;
+    }
 
-  if (!jobId) {
-    console.error("No job ID provided in URL");
-    notFound();
+    const fetchJob = async () => {
+      try {
+        setLoading(true);
+        const jobData = await getJobById(jobId);
+        if (!jobData) {
+          setError("Job not found");
+          router.push('/404');
+          return;
+        }
+        setJob(jobData as JobDetails);
+      } catch (err) {
+        console.error("Error fetching job:", err);
+        setError("Failed to load job details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [jobId, router]);
+
+  // Fetch similar jobs when job data is loaded
+  useEffect(() => {
+    if (!job) return;
+
+    const fetchSimilarJobs = async () => {
+      try {
+        const allJobs = await getJobs();
+        const similar = allJobs
+          .filter((j) => j.id !== job.id && j.category === job.category)
+          .slice(0, 3);
+        setSimilarJobs(similar);
+      } catch (err) {
+        console.error("Error fetching similar jobs:", err);
+      }
+    };
+
+    fetchSimilarJobs();
+  }, [job]);
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
-  // Get the job by ID from Firestore
-  console.log("Attempting to fetch job with ID:", jobId, "Type:", typeof jobId);
-  let job = await getJobById(jobId);
-
-  // If job not found, try with numeric ID if the provided ID is numeric
-  if (!job && !isNaN(Number(jobId))) {
-    console.log("Trying with numeric ID...");
-    job = await getJobById(Number(jobId).toString());
+  if (error || !job) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Error</h2>
+          <p className="text-gray-600 mb-4">{error || 'Job not found'}</p>
+          <Link href="/jobs" className="text-blue-600 hover:underline">
+            Back to Jobs
+          </Link>
+        </div>
+      </div>
+    );
   }
-
-  console.log("Fetched job:", job);
 
   if (!job) {
     console.error(`Job with ID ${jobId} not found`);
@@ -158,14 +197,6 @@ export default async function JobDetailsPage({
     );
   }
 
-  // Log the job ID for verification
-  console.log("Job ID from document:", job.jobId);
-
-  // Get similar jobs (same category, excluding current job)
-  const allJobs = await getJobs();
-  const similarJobs = allJobs
-    .filter((j) => j.id !== job.id && j.category === job.category)
-    .slice(0, 3);
 
   // Format requirements
   const requirements = [

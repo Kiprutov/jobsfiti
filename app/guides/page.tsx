@@ -1,9 +1,7 @@
 'use client';
 
-import Footer from "@/components/footer"
 import Link from "next/link"
 import { BookOpen, Briefcase, Zap, Users } from "lucide-react"
-
 import { useSearchParams } from 'next/navigation';
 
 export default function GuidesPage() {
@@ -62,15 +60,15 @@ export default function GuidesPage() {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-blue-600 text-white py-16">
-        <div className="w-full px-3">
+      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Career Guides</h1>
-          <p className="text-xl text-white text-opacity-90">Expert advice to help you succeed in your career journey</p>
+          <p className="text-xl text-blue-100">Expert advice to help you succeed in your career journey</p>
         </div>
       </section>
 
       {/* Guides Grid */}
-      <section className="w-full px-3 py-16">
+      <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {guides.map((guide) => {
             const Icon = guide.icon
@@ -92,8 +90,6 @@ export default function GuidesPage() {
           })}
         </div>
       </section>
-
-      <Footer />
     </main>
   )
 }

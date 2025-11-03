@@ -1,5 +1,3 @@
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
 import { ChevronDown } from "lucide-react"
 
 export default function FAQPage() {
@@ -48,7 +46,6 @@ export default function FAQPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
@@ -91,8 +88,6 @@ export default function FAQPage() {
           </a>
         </div>
       </section>
-
-      <Footer />
     </main>
   )
 }

@@ -1,4 +1,3 @@
-import Footer from "@/components/footer"
 import { Award, BookOpen, Users, TrendingUp, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
@@ -217,7 +216,6 @@ export default function ScholarshipsPage() {
         </div>
       </section>
     </main>
-    <Footer />
   </div>
   )
 }

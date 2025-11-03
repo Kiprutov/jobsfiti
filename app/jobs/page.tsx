@@ -1,6 +1,5 @@
 "use client"
 
-import Footer from "@/components/footer";
 import { FirestoreJob, getJobs } from "@/lib/services/jobsService";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
@@ -398,7 +397,6 @@ export default function JobsPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
