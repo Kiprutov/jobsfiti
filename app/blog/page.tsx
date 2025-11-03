@@ -1,8 +1,13 @@
+'use client';
+
 import Footer from "@/components/footer"
 import Link from "next/link"
 import { Clock, ArrowRight } from "lucide-react"
 
+import { useSearchParams } from 'next/navigation';
+
 export default function BlogPage() {
+  const searchParams = useSearchParams();
   const blogPosts = [
     {
       id: 1,

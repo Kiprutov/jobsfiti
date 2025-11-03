@@ -4,7 +4,9 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import ScrollHandler from "@/components/ScrollHandler"
 import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
+import SearchParamsProvider from "@/components/SearchParamsWrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -31,14 +33,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <Navbar />
-        <div className="flex-1 relative">
+    <html lang="en">
+      <body className={inter.className}>
+        <SearchParamsProvider>
           <ScrollHandler />
-          {children}
-        </div>
-        <Toaster />
+          <Navbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Toaster />
+          <Footer />
+        </SearchParamsProvider>
       </body>
     </html>
   )

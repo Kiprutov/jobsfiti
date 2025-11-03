@@ -1,8 +1,13 @@
+'use client';
+
 import Footer from "@/components/footer"
 import Link from "next/link"
 import { BookOpen, Briefcase, Zap, Users } from "lucide-react"
 
+import { useSearchParams } from 'next/navigation';
+
 export default function GuidesPage() {
+  const searchParams = useSearchParams();
   const guides = [
     {
       id: 1,
