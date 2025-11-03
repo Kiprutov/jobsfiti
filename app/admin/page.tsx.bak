@@ -1,0 +1,883 @@
+"use client"
+
+import { useState } from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import { Plus, Trash2, Edit2, ChevronDown, ChevronUp, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+
+type ExperienceLevel = "internship" | "entry" | "associate" | "mid-senior" | "director" | "executive"
+type EmploymentType = "full-time" | "part-time" | "contract" | "temporary" | "volunteer" | "internship"
+type ProficiencyLevel = "basic" | "conversational" | "professional" | "fluent" | "native"
+
+interface EducationRequirement {
+  degree: string
+  fieldOfStudy: string
+  required: boolean
+  id: string
+}
+
+interface LanguageRequirement {
+  name: string
+  proficiency: ProficiencyLevel
+  required: boolean
+  id: string
+}
+
+interface JobFormData {
+  // Core Information
+  title: string
+  description: string
+  detailedDescription: string
+  companyName: string
+  companyDescription: string
+  companyWebsite: string
+  logo: string
+  
+  // Job Details
+  role: string
+  category: string
+  subCategory: string
+  jobFunction: string
+  industry: string
+  experienceLevel: ExperienceLevel
+  employmentType: EmploymentType
+  
+  // Location
+  location: string
+  isRemote: boolean
+  remoteAllowed: boolean
+  workFromHomePolicy: string
+  
+  // Compensation
+  payout: string
+  salaryRange: {
+    min: number
+    max: number
+    currency: string
+    period: "hour" | "day" | "week" | "month" | "year"
+    isEstimate: boolean
+  }
+  bonusPotential: string
+  equityOffered: boolean
+  
+  // Application
+  link: string
+  applicationDeadline: string
+  applicationProcess: string[]
+  applicationRequirements: string[]
+  requiredDocuments: string[]
+  
+  // Requirements
+  requirements: {
+    education: EducationRequirement[]
+    experience: {
+      years: number
+      skills: string[]
+      industryExperience: string[]
+    }
+    skills: string[]
+    languages: LanguageRequirement[]
+    certifications: string[]
+    technicalSkills: string[]
+    softSkills: string[]
+  }
+  
+  // Benefits & Perks
+  benefits: {
+    healthInsurance: boolean
+    retirementPlans: boolean
+    paidTimeOff: boolean
+    flexibleHours: boolean
+    remoteWorkOptions: boolean
+    professionalDevelopment: boolean
+    wellnessPrograms: boolean
+    familyBenefits: boolean
+    relocationAssistance: boolean
+    otherBenefits: string[]
+  }
+  
+  // Company Culture
+  companyCulture: {
+    values: string[]
+    workEnvironment: string
+    diversityInclusion: string
+  }
+  
+  // Additional Metadata
+  isSponsored: boolean
+  sponsoredBy: string
+  datePosted: string
+  startDate: string
+  validThrough: string
+  hiringManager: string
+  status: "open" | "closed" | "paused" | "draft"
+  keywords: string[]
+}
+
+export default function AdminPage() {
+  const [jobs, setJobs] = useState([
+    {
+      id: 1,
+      title: "Senior Developer",
+      description: "Looking for an experienced developer",
+      location: "Kitale, Kenya",
+      payout: "$500",
+      deadline: "2025-02-15",
+      type: "Full Time",
+      category: "tech",
+    },
+  ])
+
+  const [scholarships, setScholarships] = useState([
+    {
+      id: 1,
+      name: "Tech Excellence",
+      amount: "KES 600,000",
+      description: "For outstanding tech professionals",
+      deadline: "2025-03-31",
+    },
+  ])
+
+  const [activeTab, setActiveTab] = useState("jobs")
+  const [isAddingJob, setIsAddingJob] = useState(false)
+  const [isAddingScholarship, setIsAddingScholarship] = useState(false)
+  const [editingJob, setEditingJob] = useState<number | null>(null)
+  const [editingScholarship, setEditingScholarship] = useState<number | null>(null)
+
+  const [formData, setFormData] = useState<JobFormData>({
+    // Core Information
+    title: "",
+    description: "",
+    detailedDescription: "",
+    companyName: "",
+    companyDescription: "",
+    companyWebsite: "",
+    logo: "",
+    
+    // Job Details
+    role: "",
+    category: "",
+    subCategory: "",
+    jobFunction: "",
+    industry: "",
+    experienceLevel: "mid-senior",
+    employmentType: "full-time",
+    
+    // Location
+    location: "",
+    isRemote: false,
+    remoteAllowed: true,
+    workFromHomePolicy: "",
+    
+    // Compensation
+    payout: "",
+    salaryRange: {
+      min: 0,
+      max: 0,
+      currency: "USD",
+      period: "year",
+      isEstimate: true
+    },
+    bonusPotential: "",
+    equityOffered: false,
+    
+    // Application
+    link: "",
+    applicationDeadline: "",
+    applicationProcess: [],
+    applicationRequirements: [],
+    requiredDocuments: [],
+    
+    // Requirements
+    requirements: {
+      education: [{ degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }],
+      experience: { years: 0, skills: [], industryExperience: [] },
+      skills: [],
+      languages: [],
+      certifications: [],
+      technicalSkills: [],
+      softSkills: []
+    },
+    
+    // Benefits & Perks
+    benefits: {
+      healthInsurance: false,
+      retirementPlans: false,
+      paidTimeOff: false,
+      flexibleHours: false,
+      remoteWorkOptions: false,
+      professionalDevelopment: false,
+      wellnessPrograms: false,
+      familyBenefits: false,
+      relocationAssistance: false,
+      otherBenefits: []
+    },
+    
+    // Company Culture
+    companyCulture: {
+      values: [],
+      workEnvironment: "",
+      diversityInclusion: ""
+    },
+    
+    // Additional Metadata
+    isSponsored: false,
+    sponsoredBy: "",
+    datePosted: new Date().toISOString().split('T')[0],
+    startDate: "",
+    validThrough: "",
+    hiringManager: "",
+    status: "draft",
+    keywords: []
+  })
+
+  const [scholarshipData, setScholarshipData] = useState({
+    name: "",
+    amount: "",
+    description: "",
+    deadline: "",
+  })
+
+  // Form field handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement
+    
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.')
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...(prev[parent as keyof typeof prev] as object),
+          [child]: type === 'number' ? Number(value) : value
+        }
+      }))
+    } else if (name.startsWith('salaryRange.')) {
+      const field = name.split('.')[1] as keyof JobFormData['salaryRange']
+      setFormData(prev => ({
+        ...prev,
+        salaryRange: {
+          ...prev.salaryRange,
+          [field]: field === 'min' || field === 'max' ? Number(value) : value
+        }
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'number' ? Number(value) : value
+      }))
+    }
+  }
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: checked
+    }))
+  }
+
+  const handleArrayChange = (name: string, value: string, index?: number) => {
+    if (index !== undefined) {
+      // Update existing array item
+      const arr = [...formData[name as keyof JobFormData] as any[]]
+      arr[index] = value
+      setFormData(prev => ({
+        ...prev,
+        [name]: arr
+      }))
+    } else if (value) {
+      // Add new item to array
+      setFormData(prev => ({
+        ...prev,
+        [name]: [...(prev[name as keyof JobFormData] as any[]), value]
+      }))
+    }
+  }
+
+  const removeArrayItem = (name: string, index: number) => {
+    const arr = [...formData[name as keyof JobFormData] as any[]]
+    arr.splice(index, 1)
+    setFormData(prev => ({
+      ...prev,
+      [name]: arr
+    }))
+  }
+
+  // Education Requirements
+  const addEducationRequirement = () => {
+    setFormData(prev => ({
+      ...prev,
+      requirements: {
+        ...prev.requirements,
+        education: [
+          ...prev.requirements.education,
+          { degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }
+        ]
+      }
+    }))
+  }
+
+  const updateEducationRequirement = (index: number, field: keyof EducationRequirement, value: any) => {
+    const updatedEducation = [...formData.requirements.education]
+    updatedEducation[index] = { ...updatedEducation[index], [field]: value }
+    
+    setFormData(prev => ({
+      ...prev,
+      requirements: {
+        ...prev.requirements,
+        education: updatedEducation
+      }
+    }))
+  }
+
+  const removeEducationRequirement = (index: number) => {
+    const updatedEducation = formData.requirements.education.filter((_, i) => i !== index)
+    setFormData(prev => ({
+      ...prev,
+      requirements: {
+        ...prev.requirements,
+        education: updatedEducation.length > 0 ? updatedEducation : [{ degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }]
+      }
+    }))
+  }
+
+  // Job Management Functions
+  const handleAddJob = () => {
+    if (formData.title && formData.description) {
+      const jobData = {
+        ...formData,
+        id: editingJob || Date.now(),
+        // Ensure we don't store empty education requirements
+        requirements: {
+          ...formData.requirements,
+          education: formData.requirements.education.filter(edu => edu.degree || edu.fieldOfStudy)
+        }
+      }
+
+      if (editingJob) {
+        setJobs(jobs.map((job) => (job.id === editingJob ? jobData : job)))
+        setEditingJob(null)
+      } else {
+        setJobs([...jobs, jobData])
+      }
+      
+      // Reset form
+      setFormData({
+        // ... (same as initial state)
+        title: "",
+        description: "",
+        detailedDescription: "",
+        companyName: "",
+        companyDescription: "",
+        companyWebsite: "",
+        logo: "",
+        role: "",
+        category: "",
+        subCategory: "",
+        jobFunction: "",
+        industry: "",
+        experienceLevel: "mid-senior",
+        employmentType: "full-time",
+        location: "",
+        isRemote: false,
+        remoteAllowed: true,
+        workFromHomePolicy: "",
+        payout: "",
+        salaryRange: {
+          min: 0,
+          max: 0,
+          currency: "USD",
+          period: "year",
+          isEstimate: true
+        },
+        bonusPotential: "",
+        equityOffered: false,
+        link: "",
+        applicationDeadline: "",
+        applicationProcess: [],
+        applicationRequirements: [],
+        requiredDocuments: [],
+        requirements: {
+          education: [{ degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }],
+          experience: { years: 0, skills: [], industryExperience: [] },
+          skills: [],
+          languages: [],
+          certifications: [],
+          technicalSkills: [],
+          softSkills: []
+        },
+        benefits: {
+          healthInsurance: false,
+          retirementPlans: false,
+          paidTimeOff: false,
+          flexibleHours: false,
+          remoteWorkOptions: false,
+          professionalDevelopment: false,
+          wellnessPrograms: false,
+          familyBenefits: false,
+          relocationAssistance: false,
+          otherBenefits: []
+        },
+        companyCulture: {
+          values: [],
+          workEnvironment: "",
+          diversityInclusion: ""
+        },
+        isSponsored: false,
+        sponsoredBy: "",
+        datePosted: new Date().toISOString().split('T')[0],
+        startDate: "",
+        validThrough: "",
+        hiringManager: "",
+        status: "draft",
+        keywords: []
+      })
+      
+      setIsAddingJob(false)
+    }
+  }
+
+  const handleEditJob = (job: any) => {
+    // Ensure we have all required fields with defaults
+    const jobWithDefaults = {
+      // Core Information
+      title: job.title || "",
+      description: job.description || "",
+      detailedDescription: job.detailedDescription || "",
+      companyName: job.companyName || "",
+      companyDescription: job.companyDescription || "",
+      companyWebsite: job.companyWebsite || "",
+      logo: job.logo || "",
+      
+      // Job Details
+      role: job.role || "",
+      category: job.category || "",
+      subCategory: job.subCategory || "",
+      jobFunction: job.jobFunction || "",
+      industry: job.industry || "",
+      experienceLevel: job.experienceLevel || "mid-senior",
+      employmentType: job.employmentType || "full-time",
+      
+      // Location
+      location: job.location || "",
+      isRemote: job.isRemote || false,
+      remoteAllowed: job.remoteAllowed !== undefined ? job.remoteAllowed : true,
+      workFromHomePolicy: job.workFromHomePolicy || "",
+      
+      // Compensation
+      payout: job.payout || "",
+      salaryRange: job.salaryRange || {
+        min: 0,
+        max: 0,
+        currency: "USD",
+        period: "year",
+        isEstimate: true
+      },
+      bonusPotential: job.bonusPotential || "",
+      equityOffered: job.equityOffered || false,
+      
+      // Application
+      link: job.link || "",
+      applicationDeadline: job.applicationDeadline || "",
+      applicationProcess: job.applicationProcess || [],
+      applicationRequirements: job.applicationRequirements || [],
+      requiredDocuments: job.requiredDocuments || [],
+      
+      // Requirements
+      requirements: {
+        education: (job.requirements?.education?.length ? job.requirements.education : 
+          [{ degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }]) as EducationRequirement[],
+        experience: job.requirements?.experience || { years: 0, skills: [], industryExperience: [] },
+        skills: job.requirements?.skills || [],
+        languages: job.requirements?.languages || [],
+        certifications: job.requirements?.certifications || [],
+        technicalSkills: job.requirements?.technicalSkills || [],
+        softSkills: job.requirements?.softSkills || []
+      },
+      
+      // Benefits & Perks
+      benefits: {
+        healthInsurance: job.benefits?.healthInsurance || false,
+        retirementPlans: job.benefits?.retirementPlans || false,
+        paidTimeOff: job.benefits?.paidTimeOff || false,
+        flexibleHours: job.benefits?.flexibleHours || false,
+        remoteWorkOptions: job.benefits?.remoteWorkOptions || false,
+        professionalDevelopment: job.benefits?.professionalDevelopment || false,
+        wellnessPrograms: job.benefits?.wellnessPrograms || false,
+        familyBenefits: job.benefits?.familyBenefits || false,
+        relocationAssistance: job.benefits?.relocationAssistance || false,
+        otherBenefits: job.benefits?.otherBenefits || []
+      },
+      
+      // Company Culture
+      companyCulture: {
+        values: job.companyCulture?.values || [],
+        workEnvironment: job.companyCulture?.workEnvironment || "",
+        diversityInclusion: job.companyCulture?.diversityInclusion || ""
+      },
+      
+      // Additional Metadata
+      isSponsored: job.isSponsored || false,
+      sponsoredBy: job.sponsoredBy || "",
+      datePosted: job.datePosted || new Date().toISOString().split('T')[0],
+      startDate: job.startDate || "",
+      validThrough: job.validThrough || "",
+      hiringManager: job.hiringManager || "",
+      status: job.status || "draft",
+      keywords: job.keywords || []
+    }
+    
+    setFormData(jobWithDefaults)
+    setEditingJob(job.id)
+    setIsAddingJob(true)
+  }
+
+  const handleDeleteJob = (id: number) => {
+    setJobs(jobs.filter((job) => job.id !== id))
+  }
+
+  // Scholarship Management Functions
+  const handleAddScholarship = () => {
+    if (scholarshipData.name && scholarshipData.amount) {
+      if (editingScholarship) {
+        setScholarships(
+          scholarships.map((scholarship) =>
+            scholarship.id === editingScholarship ? { ...scholarship, ...scholarshipData } : scholarship,
+          ),
+        )
+        setEditingScholarship(null)
+      } else {
+        setScholarships([...scholarships, { ...scholarshipData, id: Date.now() }])
+      }
+      setScholarshipData({ name: "", amount: "", description: "", deadline: "" })
+      setIsAddingScholarship(false)
+    }
+  }
+
+  const handleEditScholarship = (scholarship: any) => {
+    setScholarshipData(scholarship)
+    setEditingScholarship(scholarship.id)
+    setIsAddingScholarship(true)
+  }
+
+  const handleDeleteScholarship = (id: number) => {
+    setScholarships(scholarships.filter((s) => s.id !== id))
+  }
+
+  return (
+    <main className="min-h-screen bg-white">
+      <Navbar />
+
+      <section className="w-full px-3 py-12">
+        <div className="max-w-6xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
+            <p className="text-slate-600">Manage job listings and scholarships</p>
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="jobs">Job Listings</TabsTrigger>
+              <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
+            </TabsList>
+
+            {/* Jobs Tab */}
+            <TabsContent value="jobs" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-semibold text-slate-900">Manage Job Listings</h2>
+                {!isAddingJob && (
+                  <Button
+                    onClick={() => {
+                      setIsAddingJob(true)
+                      setEditingJob(null)
+                      setFormData({
+                        title: "",
+                        description: "",
+                        location: "",
+                        payout: "",
+                        deadline: "",
+                        type: "Full Time",
+                        category: "tech",
+                      })
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus size={20} />
+                    Add New Job
+                  </Button>
+                )}
+              </div>
+
+              {isAddingJob && (
+                <Card className="border-primary">
+                  <CardHeader>
+                    <CardTitle>{editingJob ? "Edit Job" : "Create New Job"}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Job Title</label>
+                      <Input
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        placeholder="e.g., Senior Developer"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                      <Textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="Job description"
+                        rows={4}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Location</label>
+                        <Input
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                          placeholder="e.g., Kitale, Kenya"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Payout</label>
+                        <Input
+                          value={formData.payout}
+                          onChange={(e) => setFormData({ ...formData, payout: e.target.value })}
+                          placeholder="e.g., $500"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Deadline</label>
+                        <Input
+                          type="date"
+                          value={formData.deadline}
+                          onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Type</label>
+                        <select
+                          value={formData.type}
+                          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+                        >
+                          <option>Full Time</option>
+                          <option>Part Time</option>
+                          <option>Contract</option>
+                          <option>Remote</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-md"
+                      >
+                        <option value="tech">Tech</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="retail">Retail</option>
+                        <option value="logistics">Logistics</option>
+                        <option value="business">Business</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      <Button onClick={handleAddJob} className="flex-1">
+                        {editingJob ? "Update Job" : "Create Job"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsAddingJob(false)
+                          setEditingJob(null)
+                          setFormData({
+                            title: "",
+                            description: "",
+                            location: "",
+                            payout: "",
+                            deadline: "",
+                            type: "Full Time",
+                            category: "tech",
+                          })
+                        }}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="space-y-4">
+                {jobs.map((job) => (
+                  <Card key={job.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-slate-900">{job.title}</h3>
+                          <p className="text-sm text-slate-600 mt-1">{job.description}</p>
+                          <div className="flex flex-wrap gap-2 mt-3 text-sm text-slate-600">
+                            <span>📍 {job.location}</span>
+                            <span>💰 {job.payout}</span>
+                            <span>📅 {job.deadline}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditJob(job)}
+                            className="flex items-center gap-1"
+                          >
+                            <Edit2 size={16} />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteJob(job.id)}
+                            className="flex items-center gap-1 text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Scholarships Tab */}
+            <TabsContent value="scholarships" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-semibold text-slate-900">Manage Scholarships</h2>
+                {!isAddingScholarship && (
+                  <Button
+                    onClick={() => {
+                      setIsAddingScholarship(true)
+                      setEditingScholarship(null)
+                      setScholarshipData({ name: "", amount: "", description: "", deadline: "" })
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus size={20} />
+                    Add New Scholarship
+                  </Button>
+                )}
+              </div>
+
+              {isAddingScholarship && (
+                <Card className="border-primary">
+                  <CardHeader>
+                    <CardTitle>{editingScholarship ? "Edit Scholarship" : "Create New Scholarship"}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Scholarship Name</label>
+                      <Input
+                        value={scholarshipData.name}
+                        onChange={(e) => setScholarshipData({ ...scholarshipData, name: e.target.value })}
+                        placeholder="e.g., Tech Excellence"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Amount</label>
+                      <Input
+                        value={scholarshipData.amount}
+                        onChange={(e) => setScholarshipData({ ...scholarshipData, amount: e.target.value })}
+                        placeholder="e.g., KES 600,000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                      <Textarea
+                        value={scholarshipData.description}
+                        onChange={(e) => setScholarshipData({ ...scholarshipData, description: e.target.value })}
+                        placeholder="Scholarship description"
+                        rows={4}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Deadline</label>
+                      <Input
+                        type="date"
+                        value={scholarshipData.deadline}
+                        onChange={(e) => setScholarshipData({ ...scholarshipData, deadline: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      <Button onClick={handleAddScholarship} className="flex-1">
+                        {editingScholarship ? "Update Scholarship" : "Create Scholarship"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsAddingScholarship(false)
+                          setEditingScholarship(null)
+                          setScholarshipData({ name: "", amount: "", description: "", deadline: "" })
+                        }}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="space-y-4">
+                {scholarships.map((scholarship) => (
+                  <Card key={scholarship.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-slate-900">{scholarship.name}</h3>
+                          <p className="text-sm text-primary font-semibold mt-1">{scholarship.amount}</p>
+                          <p className="text-sm text-slate-600 mt-2">{scholarship.description}</p>
+                          <p className="text-sm text-slate-600 mt-2">📅 Deadline: {scholarship.deadline}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditScholarship(scholarship)}
+                            className="flex items-center gap-1"
+                          >
+                            <Edit2 size={16} />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteScholarship(scholarship.id)}
+                            className="flex items-center gap-1 text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
+  )
+}
