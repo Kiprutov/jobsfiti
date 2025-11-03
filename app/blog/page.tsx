@@ -76,7 +76,7 @@ export default function BlogPage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-primary to-secondary text-white py-16">
           <div className="w-full px-3">
-            <h1 className="text-4xl font-bold mb-4">JobFiti Blog</h1>
+            <h1 className="text-4xl font-bold mb-4">JobsFiti Blog</h1>
             <p className="text-xl text-opacity-90">Expert insights and career advice to help you succeed</p>
           </div>
         </section>
@@ -122,5 +122,6 @@ export default function BlogPage() {
 
       <Footer />
     </main>
+    </div>
   )
 }

@@ -37,11 +37,25 @@ const convertFirestoreJob = (firestoreJob: any): FirestoreJob => {
 
 // Create a new job
 export const createJob = async (jobData: Omit<JobFormData, 'id'>): Promise<string> => {
-  const jobToSave = {
+  // Find the latest jobId and increment
+  const latest = await getDocuments<FirestoreJob>(
+    jobsCollection,
+    [orderBy('jobId', 'desc'), limit(1)]
+  );
+  let nextNumeric = 1;
+  if (latest.length > 0) {
+    const latestId = String(latest[0].jobId || '').replace(/[^0-9]/g, '');
+    const asNum = parseInt(latestId || '0', 10);
+    if (!isNaN(asNum)) nextNumeric = asNum + 1;
+  }
+  const nextJobId = String(nextNumeric).padStart(8, '0');
+
+  const jobToSave: any = {
     ...jobData,
+    jobId: nextJobId,
     datePosted: convertToTimestamp(jobData.datePosted) || new Date(),
   };
-  
+
   return await createDocument(jobsCollection, jobToSave);
 };
 
@@ -178,4 +192,3 @@ export const getJobsByStatus = async (status: string): Promise<FirestoreJob[]> =
   );
   return jobs.map(convertFirestoreJob);
 };
-

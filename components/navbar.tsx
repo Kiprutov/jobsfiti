@@ -1,14 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import { Menu, X, ChevronDown } from "lucide-react"
-import { jobOffers } from "@/data/job-offers"
+import { jobOffers } from "@/data/job-offers";
+import { ChevronDown, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isJobsOpen, setIsJobsOpen] = useState(false)
-  const [isPagesOpen, setIsPagesOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isJobsOpen, setIsJobsOpen] = useState(false);
+  const [isPagesOpen, setIsPagesOpen] = useState(false);
 
   const roleStats = {
     attachment: jobOffers.filter((j) => j.role === "attachment").length,
@@ -18,7 +18,7 @@ export default function Navbar() {
     "mid-level": jobOffers.filter((j) => j.role === "mid-level").length,
     senior: jobOffers.filter((j) => j.role === "senior").length,
     expert: jobOffers.filter((j) => j.role === "expert").length,
-  }
+  };
 
   const roleOptions = [
     { id: "attachment", label: "Attachment" },
@@ -28,16 +28,17 @@ export default function Navbar() {
     { id: "mid-level", label: "Mid-Level Role" },
     { id: "senior", label: "Senior Role" },
     { id: "expert", label: "Expert Role" },
-  ]
+  ];
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-slate-100">
-      <div className="w-full px-3">
+      <div className="w-full px-3 pr-5 md:pr-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              JobFiti
+            <span className="text-2xl md:text-3xl font-bold">
+              <span className="text-primary">Jobs</span>
+              <span className="text-secondary">Fiti</span>
             </span>
           </Link>
 
@@ -60,7 +61,10 @@ export default function Navbar() {
             <div className="relative group">
               <button className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-primary transition-colors duration-200 hover:bg-slate-50 rounded-md flex items-center gap-2">
                 Jobs
-                <ChevronDown size={16} className="group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown
+                  size={16}
+                  className="group-hover:rotate-180 transition-transform duration-200"
+                />
               </button>
               <div className="absolute left-0 mt-0 w-56 bg-white rounded-md shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
                 <Link
@@ -77,7 +81,9 @@ export default function Navbar() {
                   >
                     <span className="flex justify-between items-center">
                       <span>{role.label}</span>
-                      <span className="text-xs text-slate-500">{roleStats[role.id as keyof typeof roleStats]}</span>
+                      <span className="text-xs text-slate-500">
+                        {roleStats[role.id as keyof typeof roleStats]}
+                      </span>
                     </span>
                   </Link>
                 ))}
@@ -88,7 +94,10 @@ export default function Navbar() {
             <div className="relative group">
               <button className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-primary transition-colors duration-200 hover:bg-slate-50 rounded-md flex items-center gap-2">
                 Resources
-                <ChevronDown size={16} className="group-hover:rotate-180 transition-transform duration-200" />
+                <ChevronDown
+                  size={16}
+                  className="group-hover:rotate-180 transition-transform duration-200"
+                />
               </button>
               <div className="absolute left-0 mt-0 w-48 bg-white rounded-md shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
                 <Link
@@ -123,13 +132,6 @@ export default function Navbar() {
               className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-primary transition-colors duration-200 hover:bg-slate-50 rounded-md"
             >
               Contact
-            </Link>
-
-            <Link
-              href="/admin"
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-primary transition-colors duration-200 hover:bg-slate-50 rounded-md"
-            >
-              Admin
             </Link>
           </div>
 
@@ -169,7 +171,12 @@ export default function Navbar() {
                 onClick={() => setIsJobsOpen(!isJobsOpen)}
               >
                 Jobs
-                <ChevronDown size={16} className={`transition-transform ${isJobsOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${
+                    isJobsOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
               {isJobsOpen && (
                 <div className="pl-4 space-y-1 mt-1">
@@ -189,7 +196,9 @@ export default function Navbar() {
                     >
                       <span className="flex justify-between items-center">
                         <span>{role.label}</span>
-                        <span className="text-xs text-slate-500">{roleStats[role.id as keyof typeof roleStats]}</span>
+                        <span className="text-xs text-slate-500">
+                          {roleStats[role.id as keyof typeof roleStats]}
+                        </span>
                       </span>
                     </Link>
                   ))}
@@ -204,7 +213,12 @@ export default function Navbar() {
                 onClick={() => setIsPagesOpen(!isPagesOpen)}
               >
                 Resources
-                <ChevronDown size={16} className={`transition-transform ${isPagesOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${
+                    isPagesOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
               {isPagesOpen && (
                 <div className="pl-4 space-y-1 mt-1">
@@ -247,17 +261,9 @@ export default function Navbar() {
             >
               Contact
             </Link>
-
-            <Link
-              href="/admin"
-              className="block px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Admin
-            </Link>
           </div>
         </div>
       )}
     </nav>
-  )
+  );
 }

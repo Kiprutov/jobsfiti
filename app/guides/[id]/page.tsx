@@ -1,7 +1,7 @@
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import Footer from "@/components/footer";
+import GuideContent from "./GuideContent";
 
 const guideContent: Record<number, any> = {
   1: {
@@ -228,46 +228,111 @@ const guideContent: Record<number, any> = {
   },
 }
 
-export default function GuidePage({ params }: { params: { id: string } }) {
-  const guide = guideContent[Number.parseInt(params.id)]
+const TableOfContents = ({ content }: { content: string }) => {
+  const [headings, setHeadings] = useState<{id: string; text: string; level: number}[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<div>${content}</div>`, 'text/html');
+    const h2s = Array.from(doc.querySelectorAll('h2'));
+    
+    // Extract headings for TOC
+    const extractedHeadings = h2s.map((h2, index) => {
+      const id = `section-${index}`;
+      h2.id = id;
+      return {
+        id,
+        text: h2.textContent || '',
+        level: parseInt(h2.tagName.substring(1))
+      };
+    });
+    
+    setHeadings(extractedHeadings);
+
+    // Set up intersection observer for active section highlighting
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -80% 0px', threshold: 0.1 }
+    );
+
+    // Observe all headings
+    h2s.forEach((h2) => {
+      const element = document.getElementById(h2.id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [content]);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (headings.length === 0) return null;
+
+  return (
+    <div className="sticky top-24 hidden lg:block">
+      <div className="border-l-2 border-slate-200 pl-4 space-y-2">
+        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
+          Table of Contents
+        </h3>
+        {headings.map((heading) => (
+          <a
+            key={heading.id}
+            href={`#${heading.id}`}
+            className={cn(
+              'block text-sm py-1.5 px-2 -ml-1 rounded transition-colors',
+              activeId === heading.id
+                ? 'text-primary font-medium bg-primary/5 border-l-2 border-primary -ml-3 pl-3'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            )}
+          >
+            {heading.text}
+          </a>
+        ))}
+        <button
+          onClick={scrollToTop}
+          className="mt-4 flex items-center text-sm text-slate-500 hover:text-primary transition-colors"
+        >
+          <ChevronUp className="w-4 h-4 mr-1" />
+          Back to top
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function GuidePage({ params }: { params: { id: string } }) {
+  const guide = guideContent[Number.parseInt(params.id)];
+  
   if (!guide) {
     return (
-      <main className="min-h-screen bg-white">
-        <Navbar />
-        <div className="w-full px-3 py-16 text-center">
+      <main className="min-h-screen bg-slate-50">
+        <div className="w-full px-4 py-16 text-center max-w-7xl mx-auto">
           <h1 className="text-2xl font-bold text-slate-900">Guide not found</h1>
+          <Link href="/guides" className="mt-4 inline-flex items-center text-primary hover:underline">
+            <ArrowLeft size={16} className="mr-1" />
+            Back to Guides
+          </Link>
         </div>
         <Footer />
       </main>
-    )
+    );
   }
 
   return (
-    <main className="min-h-screen bg-white">
-      <Navbar />
-
-      <section className="w-full px-3 py-12">
-        <div className="max-w-3xl">
-          <Link href="/guides" className="flex items-center gap-2 text-primary mb-6 hover:underline">
-            <ArrowLeft size={18} />
-            Back to Guides
-          </Link>
-
-          <div className="mb-8">
-            <p className="text-primary font-semibold mb-2">{guide.category}</p>
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">{guide.title}</h1>
-            <p className="text-slate-600">{guide.readTime} read</p>
-          </div>
-
-          <div
-            className="prose prose-sm max-w-none text-slate-700 leading-relaxed space-y-4"
-            dangerouslySetInnerHTML={{ __html: guide.content }}
-          />
-        </div>
-      </section>
-
+    <>
+      <GuideContent guide={guide} />
       <Footer />
-    </main>
+    </>
   )
 }

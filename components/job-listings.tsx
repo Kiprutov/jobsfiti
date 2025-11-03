@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Heart, MapPin, Clock, DollarSign } from "lucide-react"
-import Image from "next/image"
+import { Heart, MapPin } from "lucide-react"
 import Link from "next/link"
 import { getJobs } from "@/lib/services/jobsService"
 import { FirestoreJob, getJobById } from "@/lib/services/jobsService"
@@ -186,7 +185,7 @@ export default function JobListings() {
                           }
                         }}
                       >
-                        Apply Now
+                        View Details
                       </Link>
                     </div>
                   </div>

@@ -1,4 +1,3 @@
-import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Link from "next/link"
 import { BookOpen, Briefcase, Zap, Users } from "lucide-react"
@@ -57,10 +56,8 @@ export default function GuidesPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
-
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-secondary text-white py-16">
+      <section className="bg-blue-600 text-white py-16">
         <div className="w-full px-3">
           <h1 className="text-4xl font-bold mb-4">Career Guides</h1>
           <p className="text-xl text-white text-opacity-90">Expert advice to help you succeed in your career journey</p>
@@ -76,11 +73,11 @@ export default function GuidesPage() {
               <Link
                 key={guide.id}
                 href={`/guides/${guide.id}`}
-                className="bg-white border border-slate-200 rounded-md p-6 shadow-sm hover:shadow-md hover:border-primary transition-all duration-200 group"
+                className="bg-white border border-slate-200 rounded-md p-6 shadow-sm hover:shadow-md hover:border-blue-600 transition-all duration-200 group"
               >
-                <Icon className="text-primary mb-4 group-hover:scale-110 transition-transform" size={32} />
-                <p className="text-sm text-primary font-medium mb-2">{guide.category}</p>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-primary transition-colors">
+                <Icon className="text-blue-600 mb-4 group-hover:scale-110 transition-transform" size={32} />
+                <p className="text-sm text-blue-600 font-medium mb-2">{guide.category}</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
                   {guide.title}
                 </h3>
                 <p className="text-slate-600 text-sm mb-4">{guide.description}</p>

@@ -6,9 +6,12 @@ export default function Footer() {
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-2xl font-bold text-primary mb-4">JobFiti</h3>
+            <h3 className="text-2xl font-bold mb-4">
+              <span className="text-primary">Jobs</span>
+              <span className="text-secondary">Fiti</span>
+            </h3>
             <p className="text-gray-400 mb-4">
-              Find your dream job with JobFiti. We connect talented individuals with top employers.
+              Find your dream job with JobsFiti. We connect talented individuals with top employers.
             </p>
           </div>
 
@@ -26,8 +29,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/jobs" className="text-gray-400 hover:text-primary">
-                  Browse Jobs
+                <Link href="/admin" className="text-gray-400 hover:text-primary">
+                  Admin
                 </Link>
               </li>
               <li>
@@ -81,7 +84,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
-          <p>&copy; {new Date().getFullYear()} JobFiti. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} JobsFiti. All rights reserved.</p>
         </div>
       </div>
     </footer>

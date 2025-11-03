@@ -79,7 +79,7 @@ export interface JobFormData {
   requirements: {
     education: EducationRequirement[]
     experience: {
-      years: number
+      years: string
       skills: string[]
       industryExperience: string[]
     }
@@ -89,6 +89,7 @@ export interface JobFormData {
     technicalSkills: string[]
     softSkills: string[]
   }
+  requirementsText?: string
   
   // Benefits & Perks
   benefits: {
@@ -176,13 +177,14 @@ export const initialFormData: JobFormData = {
   // Requirements
   requirements: {
     education: [{ degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }],
-    experience: { years: 0, skills: [], industryExperience: [] },
+    experience: { years: "", skills: [], industryExperience: [] },
     skills: [],
     languages: [],
     certifications: [],
     technicalSkills: [],
     softSkills: []
   },
+  requirementsText: "",
   
   // Benefits & Perks
   benefits: {

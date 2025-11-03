@@ -5,14 +5,14 @@ import { ChevronDown } from "lucide-react"
 export default function FAQPage() {
   const faqs = [
     {
-      question: "How do I create an account on JobFiti?",
+      question: "How do I create an account on JobsFiti?",
       answer:
         "Simply click the Sign Up button on our homepage, enter your email and password, and fill in your basic profile information. You can start applying to jobs immediately.",
     },
     {
       question: "Is there a fee to apply for jobs?",
       answer:
-        "No, JobFiti is completely free for job seekers. You can browse and apply to all our listings without any charges.",
+        "No, JobsFiti is completely free for job seekers. You can browse and apply to all our listings without any charges.",
     },
     {
       question: "How often are new jobs posted?",
@@ -54,7 +54,7 @@ export default function FAQPage() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
-          <p className="text-xl text-blue-100">Find answers to common questions about JobFiti</p>
+          <p className="text-xl text-blue-100">Find answers to common questions about JobsFiti</p>
         </div>
       </section>
 

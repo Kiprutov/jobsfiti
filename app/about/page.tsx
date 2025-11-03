@@ -33,7 +33,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">About JobFiti</h1>
+          <h1 className="text-4xl font-bold mb-4">About JobsFiti</h1>
           <p className="text-xl text-blue-100">Connecting talented professionals with their dream opportunities</p>
         </div>
       </section>
@@ -44,7 +44,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Our Mission</h2>
             <p className="text-slate-600 mb-4 leading-relaxed">
-              JobFiti exists to bridge the gap between talented professionals and meaningful career opportunities. We
+              JobsFiti exists to bridge the gap between talented professionals and meaningful career opportunities. We
               believe that everyone deserves access to high-quality job listings and the support to succeed in their
               career journey.
             </p>

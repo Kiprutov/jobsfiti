@@ -93,7 +93,7 @@ export default function ScholarshipsPage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
           <div className="max-w-7xl mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">JobFiti Scholarships</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">JobsFiti Scholarships</h1>
             <p className="text-xl text-blue-100 mb-0">
               Invest in your future with our educational and career development scholarships
             </p>
@@ -141,7 +141,7 @@ export default function ScholarshipsPage() {
       {/* Why Choose Our Scholarships */}
       <section className="bg-slate-50 py-20">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Why Choose JobFiti Scholarships?</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Why Choose JobsFiti Scholarships?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg p-8 shadow-sm text-center">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">

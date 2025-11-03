@@ -17,7 +17,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "JobFiti - Find Your Perfect Job",
+  title: "JobsFiti - Find Your Perfect Job",
   description: "Discover exciting job opportunities that match your skills and passion.",
   generator: "v0.app",
   other: {

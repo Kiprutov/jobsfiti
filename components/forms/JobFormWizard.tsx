@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StepIndicator } from "@/components/ui/step-indicator"
 import { Trash2, Plus, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { JobFormData, initialFormData } from "./JobForm"
+import { addCategory as addCategoryService, getCategories as getCategoriesService, Category as CategoryItem } from "@/lib/services/categoriesService"
 import {
   step1Schema,
   step2Schema,
@@ -53,7 +54,7 @@ const ROLES = [
   { id: "expert", label: "Expert Role" },
 ]
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES: CategoryItem[] = [
   { id: "tech", label: "Technology" },
   { id: "healthcare", label: "Healthcare" },
   { id: "business", label: "Business" },
@@ -67,10 +68,24 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
   const [formData, setFormData] = useState<Partial<JobFormData>>({
     ...initialFormData,
     ...(initialData || {}),
-    id: initialData?.id || 0,
   })
   const [completedSteps, setCompletedSteps] = useState<number[]>([])
   const { toast } = useToast()
+  const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES)
+  const [newCategoryLabel, setNewCategoryLabel] = useState("")
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const fetched = await getCategoriesService()
+        if (fetched && fetched.length > 0) {
+          setCategories(fetched)
+        }
+      } catch (e) {
+        // ignore fetch errors; keep defaults
+      }
+    })()
+  }, [])
 
   // Validation schemas for each step
   const stepValidators = [
@@ -179,6 +194,23 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
   )
 
   // Step 2: Category Selection
+  const handleAddCategory = async () => {
+    const label = newCategoryLabel.trim()
+    if (!label) return
+    try {
+      const created = await addCategoryService(label)
+      setCategories((prev) => {
+        if (prev.find((c) => c.id === created.id)) return prev
+        return [...prev, created]
+      })
+      updateFormData({ category: created.id })
+      setNewCategoryLabel("")
+      toast({ title: "Category added", description: `${created.label} was added.` })
+    } catch (err) {
+      toast({ title: "Failed to add category", description: err instanceof Error ? err.message : "", variant: "destructive" })
+    }
+  }
+
   const renderStep2 = () => (
     <div className="space-y-6">
       <div>
@@ -188,7 +220,7 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <button
             key={category.id}
             type="button"
@@ -202,6 +234,25 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
             <div className="font-medium">{category.label}</div>
           </button>
         ))}
+      </div>
+      <div className="mt-2 p-3 border rounded-lg bg-slate-50">
+        <div className="text-sm font-medium mb-2">Don't see your category?</div>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Add new category (e.g., Education)"
+            value={newCategoryLabel}
+            onChange={(e) => setNewCategoryLabel(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleAddCategory()
+              }
+            }}
+          />
+          <Button type="button" onClick={handleAddCategory} variant="outline">
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -389,6 +440,39 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
               </div>
             </div>
           )}
+        </div>
+        {/* Application Section */}
+        <div className="space-y-2 md:col-span-2 pt-2">
+          <h4 className="text-base font-semibold">Application</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="applicationLink">Application Link (URL)</Label>
+              <Input
+                id="applicationLink"
+                type="url"
+                value={formData.link || ""}
+                onChange={(e) => updateFormData({ link: e.target.value })}
+                placeholder="https://apply.example.com/your-job"
+              />
+              <p className="text-xs text-gray-500">If provided, the Apply button on the job page will use this URL.</p>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="applicationProcess">Application Process (one step per line)</Label>
+              <Textarea
+                id="applicationProcess"
+                value={(formData.applicationProcess || []).join("\n")}
+                onChange={(e) => {
+                  const lines = e.target.value
+                    .split(/\r?\n/)
+                    .map((l) => l.trim())
+                    .filter((l) => l.length > 0)
+                  updateFormData({ applicationProcess: lines })
+                }}
+                placeholder={"e.g.\n1) Submit resume\n2) Phone interview\n3) Technical task"}
+                rows={5}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -646,21 +730,20 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
           <div className="space-y-2">
             <Label>Years of Experience</Label>
             <Input
-              type="number"
-              value={formData.requirements?.experience?.years || 0}
+              type="text"
+              value={formData.requirements?.experience?.years || ""}
               onChange={(e) =>
                 updateFormData({
                   requirements: {
                     ...formData.requirements!,
                     experience: {
                       ...formData.requirements?.experience!,
-                      years: Number(e.target.value) || 0,
+                      years: e.target.value,
                     },
                   },
                 })
               }
-              min="0"
-              placeholder="e.g., 5"
+              placeholder="e.g., 3-5"
             />
           </div>
         </div>
@@ -722,6 +805,18 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
               }
             }}
           />
+        </div>
+
+        {/* Optional Freeform Requirements */}
+        <div className="space-y-2">
+          <h4 className="font-medium">Additional Requirements (optional)</h4>
+          <Textarea
+            placeholder={"Paste or write requirements here, one per paragraph or line..."}
+            rows={6}
+            value={formData.requirementsText || ""}
+            onChange={(e) => updateFormData({ requirementsText: e.target.value })}
+          />
+          <p className="text-xs text-gray-500">These will be listed along with the other requirements on the job page.</p>
         </div>
       </div>
     )
@@ -888,7 +983,7 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
               <span className="font-medium">Role:</span> {ROLES.find((r) => r.id === formData.role)?.label || "N/A"}
             </div>
             <div>
-              <span className="font-medium">Category:</span> {CATEGORIES.find((c) => c.id === formData.category)?.label || "N/A"}
+              <span className="font-medium">Category:</span> {categories.find((c) => c.id === formData.category)?.label || formData.category || "N/A"}
             </div>
             <div>
               <span className="font-medium">Location:</span> {formData.location || "N/A"}
@@ -899,6 +994,11 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
             <div>
               <span className="font-medium">Experience Level:</span> {formData.experienceLevel || "N/A"}
             </div>
+            {formData.link && (
+              <div>
+                <span className="font-medium">Application Link:</span> {formData.link}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -909,6 +1009,21 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
             </CardHeader>
             <CardContent>
               <p className="text-sm">{formData.description}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {(formData.applicationProcess && formData.applicationProcess.length > 0) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Application Process</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ol className="list-decimal ml-5 space-y-1">
+                {formData.applicationProcess.map((step, idx) => (
+                  <li key={idx} className="text-sm">{step}</li>
+                ))}
+              </ol>
             </CardContent>
           </Card>
         )}
@@ -1012,4 +1127,3 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
     </div>
   )
 }
-

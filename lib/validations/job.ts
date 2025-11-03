@@ -9,9 +9,7 @@ export const step1Schema = z.object({
 
 // Step 2: Category Selection Schema
 export const step2Schema = z.object({
-  category: z.enum(['tech', 'healthcare', 'business', 'retail', 'logistics', 'other'], {
-    required_error: 'Please select a category',
-  }),
+  category: z.string().min(2, 'Please select or enter a category'),
 });
 
 // Step 3: Basic Information Schema
@@ -65,7 +63,7 @@ export const step6Schema = z.object({
       id: z.string(),
     })).optional(),
     experience: z.object({
-      years: z.number().min(0),
+      years: z.string().min(1, 'Years of experience is required'),
       skills: z.array(z.string()).optional(),
       industryExperience: z.array(z.string()).optional(),
     }).optional(),
@@ -80,6 +78,7 @@ export const step6Schema = z.object({
     technicalSkills: z.array(z.string()).optional(),
     softSkills: z.array(z.string()).optional(),
   }),
+  requirementsText: z.string().optional(),
   applicationProcess: z.array(z.string()).optional(),
   applicationRequirements: z.array(z.string()).optional(),
   requiredDocuments: z.array(z.string()).optional(),
@@ -117,7 +116,7 @@ export const fullJobSchema = z.object({
   companyWebsite: z.string().url().optional().or(z.literal('')),
   logo: z.string().optional(),
   role: z.enum(['attachment', 'internship', 'graduate', 'junior', 'mid-level', 'senior', 'expert']),
-  category: z.enum(['tech', 'healthcare', 'business', 'retail', 'logistics', 'other']),
+  category: z.string().min(2),
   subCategory: z.string().optional(),
   jobFunction: z.string().optional(),
   industry: z.string().optional(),
@@ -150,7 +149,7 @@ export const fullJobSchema = z.object({
       id: z.string(),
     })).optional(),
     experience: z.object({
-      years: z.number().min(0),
+      years: z.string().min(1),
       skills: z.array(z.string()).optional(),
       industryExperience: z.array(z.string()).optional(),
     }).optional(),
@@ -165,6 +164,7 @@ export const fullJobSchema = z.object({
     technicalSkills: z.array(z.string()).optional(),
     softSkills: z.array(z.string()).optional(),
   }),
+  requirementsText: z.string().optional(),
   benefits: z.object({
     healthInsurance: z.boolean().optional(),
     retirementPlans: z.boolean().optional(),
@@ -199,4 +199,3 @@ export type Step4FormData = z.infer<typeof step4Schema>;
 export type Step5FormData = z.infer<typeof step5Schema>;
 export type Step6FormData = z.infer<typeof step6Schema>;
 export type Step7FormData = z.infer<typeof step7Schema>;
-
