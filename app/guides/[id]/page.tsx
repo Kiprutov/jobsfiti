@@ -1,23 +1,19 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import Footer from "@/components/footer";
-import GuideContent from "./GuideContent";
+"use client";
 
-// Generate static params for all guide pages
-export async function generateStaticParams() {
-  // Return an array of all possible guide IDs
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' },
-    { id: '4' },
-    { id: '5' },
-  ];
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Guide {
+  title: string;
+  category: string;
+  readTime: string;
+  content: string;
 }
 
-export const dynamicParams = false; // Return 404 for non-existent guides
-
-const guideContent: Record<number, any> = {
+const guideContent: Record<number, Guide> = {
   1: {
     title: "How to Write a Winning Resume",
     category: "Career Tips",
@@ -287,8 +283,14 @@ const TableOfContents = ({ content }: { content: string }) => {
     return () => observer.disconnect();
   }, [content]);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToHeading = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      window.scrollTo({
+        top: element.offsetTop - 100,
+        behavior: 'smooth'
+      });
+    }
   };
 
   if (headings.length === 0) return null;
@@ -300,22 +302,20 @@ const TableOfContents = ({ content }: { content: string }) => {
           Table of Contents
         </h3>
         {headings.map((heading) => (
-          <a
+          <button
             key={heading.id}
-            href={`#${heading.id}`}
             className={cn(
-              'block text-sm py-1.5 px-2 -ml-1 rounded transition-colors',
-              activeId === heading.id
-                ? 'text-primary font-medium bg-primary/5 border-l-2 border-primary -ml-3 pl-3'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              "block text-sm text-left w-full text-slate-600 hover:text-slate-900 transition-colors",
+              activeId === heading.id && "text-blue-600 font-medium"
             )}
+            onClick={() => scrollToHeading(heading.id)}
           >
             {heading.text}
-          </a>
+          </button>
         ))}
         <button
-          onClick={scrollToTop}
-          className="mt-4 flex items-center text-sm text-slate-500 hover:text-primary transition-colors"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors"
         >
           <ChevronUp className="w-4 h-4 mr-1" />
           Back to top
@@ -325,28 +325,55 @@ const TableOfContents = ({ content }: { content: string }) => {
   );
 };
 
-export default function GuidePage({ params }: { params: { id: string } }) {
-  const guide = guideContent[Number.parseInt(params.id)];
+export default function GuidePage() {
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id || '1';
+  const guideId = parseInt(id);
+  const guide = guideContent[guideId as keyof typeof guideContent];
   
   if (!guide) {
     return (
-      <main className="min-h-screen bg-slate-50">
-        <div className="w-full px-4 py-16 text-center max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold text-slate-900">Guide not found</h1>
-          <Link href="/guides" className="mt-4 inline-flex items-center text-primary hover:underline">
-            <ArrowLeft size={16} className="mr-1" />
+      <div className="container mx-auto py-12 px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Guide not found</h1>
+          <Link href="/guides" className="text-blue-600 hover:underline">
             Back to Guides
           </Link>
         </div>
-        <Footer />
-      </main>
+      </div>
     );
   }
 
   return (
-    <>
-      <GuideContent guide={guide} />
-      <Footer />
-    </>
+    <div className="container mx-auto py-8 px-4 max-w-5xl">
+      <div className="mb-8">
+        <Link href="/guides" className="inline-flex items-center text-blue-600 hover:underline mb-4">
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Guides
+        </Link>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div>
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
+              {guide.category}
+            </span>
+            <h1 className="text-3xl font-bold text-gray-900">{guide.title}</h1>
+            <div className="flex items-center text-sm text-gray-500 mt-2">
+              <span>{guide.readTime} read</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="lg:w-3/4">
+          <div 
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: guide.content }}
+          />
+        </div>
+        
+        <TableOfContents content={guide.content} />
+      </div>
+    </div>
   )
 }

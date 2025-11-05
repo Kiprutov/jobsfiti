@@ -20,13 +20,7 @@ const nextConfig = {
     ],
   },
   
-  // Experimental features
-  experimental: {
-    // Enable server actions (if needed)
-    serverActions: true,
-  },
-  
-  // Enable webpack 5
+  // Webpack configuration
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Don't include certain packages in the client bundle
@@ -36,6 +30,8 @@ const nextConfig = {
         net: false,
         tls: false,
         dns: false,
+        child_process: false,
+        process: false,
       };
     }
     return config;

@@ -125,9 +125,9 @@ export default function JobListings() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {job.type && (
+                    {job.employmentType && (
                       <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded">
-                        {job.type}
+                        {job.employmentType}
                       </span>
                     )}
                     {job.location && (

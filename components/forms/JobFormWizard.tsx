@@ -10,8 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { StepIndicator } from "@/components/ui/step-indicator"
-import { Trash2, Plus, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Trash2, Plus, X, ChevronLeft, ChevronRight, Check } from "lucide-react"
 import { JobFormData, initialFormData } from "./JobForm"
 import { addCategory as addCategoryService, getCategories as getCategoriesService, Category as CategoryItem } from "@/lib/services/categoriesService"
 import {
@@ -871,7 +870,7 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
               <div key={benefit.key} className="flex items-center space-x-2">
                 <Checkbox
                   id={benefit.key}
-                  checked={formData.benefits?.[benefit.key as keyof typeof formData.benefits] || false}
+                  checked={Boolean(formData.benefits?.[benefit.key as keyof JobFormData['benefits']] as boolean)}
                   onCheckedChange={(checked) =>
                     updateFormData({
                       benefits: {
@@ -1078,12 +1077,31 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
         </CardHeader>
         <CardContent>
           {/* Step Indicator */}
-          <div className="mb-8">
-            <StepIndicator
-              steps={STEPS}
-              currentStep={currentStep}
-              completedSteps={completedSteps}
-            />
+          <div className="mb-8 flex items-center justify-between">
+            {STEPS.map((step) => (
+              <div key={step.number} className="flex flex-col items-center">
+                <div 
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                    currentStep === step.number 
+                      ? 'bg-primary text-primary-foreground' 
+                      : currentStep > step.number 
+                        ? 'bg-green-100 text-green-600' 
+                        : 'bg-muted'
+                  }`}
+                >
+                  {currentStep > step.number ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <span className="text-sm font-medium">{step.number}</span>
+                  )}
+                </div>
+                <span className={`mt-2 text-xs text-center ${
+                  currentStep === step.number ? 'font-medium' : 'text-muted-foreground'
+                }`}>
+                  {step.title}
+                </span>
+              </div>
+            ))}
           </div>
 
           {/* Current Step Content */}

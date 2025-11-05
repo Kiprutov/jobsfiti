@@ -80,7 +80,7 @@ export default function JobsPage() {
     setIsSubmitting(true)
     try {
       if (editingJob && editingJob.id) {
-        await updateJob(editingJob.id, data)
+        await updateJob(String(editingJob.id), data)
         toast({
           title: "Success",
           description: "Job updated successfully!",
@@ -121,15 +121,15 @@ export default function JobsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDeleteJob = async (jobId: string) => {
+  const handleDeleteJob = async (jobId: string | number) => {
     if (window.confirm('Are you sure you want to delete this job?')) {
       try {
-        await deleteJob(jobId)
+        await deleteJob(String(jobId))
         toast({
           title: "Success",
           description: "Job deleted successfully!",
         })
-        if (editingJob && editingJob.id === jobId) {
+        if (editingJob && editingJob.id?.toString() === jobId.toString()) {
           setEditingJob(null)
           setShowForm(false)
         }
@@ -269,7 +269,7 @@ export default function JobsPage() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => job.id && handleDeleteJob(job.id)}
+                          onClick={() => job.id && handleDeleteJob(String(job.id))}
                           aria-label={`Delete ${job.title}`}
                         >
                           <Trash2 className="h-4 w-4" />

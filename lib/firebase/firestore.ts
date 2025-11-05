@@ -82,16 +82,19 @@ export const getDocument = async <T>(
   return null;
 };
 
-export const getDocuments = async <T>(
+export const getDocuments = async <T extends Record<string, any>>(
   collectionRef: any,
   constraints: QueryConstraint[] = []
-): Promise<T[]> => {
+): Promise<(T & { id: string })[]> => {
   const q = query(collectionRef, ...constraints);
   const querySnapshot = await getDocs(q);
   
-  return querySnapshot.docs.map((docSnap: QueryDocumentSnapshot<DocumentData>) => ({
-    id: docSnap.id,
-    ...docSnap.data(),
-  })) as T[];
+  return querySnapshot.docs.map((docSnap) => {
+    const data = docSnap.data();
+    return {
+      ...data as T,
+      id: docSnap.id,
+    };
+  });
 };
 

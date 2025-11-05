@@ -97,12 +97,13 @@ export const getJobById = async (jobId: string): Promise<FirestoreJob | null> =>
       const allJobs = await getDocuments<FirestoreJob>(jobsCollection);
       
       // Try different ID formats
-      const foundJob = allJobs.find(job => 
-        String(job.jobId) === String(jobId) || 
-        String(job.id) === String(jobId) ||
-        job.id?.toString() === jobId ||
-        job.jobId?.toString() === jobId
-      );
+      const foundJob = allJobs.find((job: FirestoreJob) => {
+        const jobIdStr = String(jobId);
+        return (
+          (job.jobId && String(job.jobId) === jobIdStr) ||
+          (job.id && String(job.id) === jobIdStr)
+        );
+      });
       
       if (foundJob) {
         console.log('Found job with alternative ID format:', foundJob);

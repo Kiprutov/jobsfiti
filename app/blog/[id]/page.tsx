@@ -1,5 +1,3 @@
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
 import { Clock, User, Calendar } from "lucide-react"
 
 // Generate static params for all blog posts
@@ -241,28 +239,26 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
 
   if (!post) {
     return (
-      <main className="min-h-screen bg-white">
-        <Navbar />
-        <div className="w-full px-3 py-16 text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Post not found</h1>
-        </div>
-        <Footer />
-      </main>
+      <div className="w-full px-3 py-16 text-center">
+        <h1 className="text-2xl font-bold text-slate-900">Post not found</h1>
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-white">
-      <Navbar />
-
+    <>
       {/* Featured Image */}
       <div className="w-full h-96 bg-slate-200 overflow-hidden">
-        <img src={post.image || "/placeholder.svg"} alt={post.title} className="w-full h-full object-cover" />
+        <img 
+          src={post.image || "/placeholder.svg"} 
+          alt={post.title} 
+          className="w-full h-full object-cover" 
+        />
       </div>
 
       {/* Article Content */}
       <article className="w-full px-3 py-12">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl mx-auto">
           <div className="mb-8">
             <p className="text-primary font-semibold mb-2">{post.category}</p>
             <h1 className="text-4xl font-bold text-slate-900 mb-6">{post.title}</h1>
@@ -288,8 +284,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           />
         </div>
       </article>
-
-      <Footer />
-    </main>
+    </>
   )
 }

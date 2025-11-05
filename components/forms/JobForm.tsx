@@ -32,7 +32,7 @@ interface LanguageRequirement {
 
 export interface JobFormData {
   // Core Information
-  id: number
+  id?: number
   title: string
   description: string
   detailedDescription: string
@@ -130,7 +130,7 @@ interface JobFormProps {
   isSubmitting?: boolean
 }
 
-export const initialFormData: JobFormData = {
+export const initialFormData: Omit<JobFormData, 'id'> = {
   // Core Information
   title: "",
   description: "",
@@ -681,7 +681,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                             ...formData.requirements,
                             experience: {
                               ...formData.requirements.experience,
-                              years: parseInt(e.target.value) || 0
+                              years: e.target.value
                             }
                           }
                         })

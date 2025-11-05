@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { FirestoreJob, getJobById } from "@/lib/services/jobsService";
-import Footer from "@/components/footer";
+import { FirestoreJob, getJobById, getJobs } from "@/lib/services/jobsService";
 import {
   ArrowLeft,
   Briefcase,
@@ -114,7 +113,7 @@ export default function JobDetailsPage() {
       try {
         const allJobs = await getJobs();
         const similar = allJobs
-          .filter((j) => j.id !== job.id && j.category === job.category)
+          .filter((j) => j.jobId !== job.jobId && j.category === job.category)
           .slice(0, 3);
         setSimilarJobs(similar);
       } catch (err) {
@@ -192,7 +191,6 @@ export default function JobDetailsPage() {
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -704,7 +702,6 @@ export default function JobDetailsPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
