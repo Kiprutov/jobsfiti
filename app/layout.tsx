@@ -6,6 +6,7 @@ import ScrollHandler from "@/components/ScrollHandler"
 import ConditionalLayout from "@/components/ConditionalLayout"
 import { Toaster } from "@/components/ui/toaster"
 import SearchParamsProvider from "@/components/SearchParamsWrapper"
+import { AuthProvider } from "@/lib/contexts/AuthContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -34,13 +35,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SearchParamsProvider>
-          <ScrollHandler />
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
-          <Toaster />
-        </SearchParamsProvider>
+        <AuthProvider>
+          <SearchParamsProvider>
+            <ScrollHandler />
+            <ConditionalLayout>
+              {children}
+            </ConditionalLayout>
+            <Toaster />
+          </SearchParamsProvider>
+        </AuthProvider>
       </body>
     </html>
   )

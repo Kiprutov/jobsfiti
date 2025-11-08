@@ -1,10 +1,18 @@
 "use client"
 
 import { FirestoreJob, getJobs } from "@/lib/services/jobsService";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Heart } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { 
+  addJobInterest, 
+  deleteJobInterest, 
+  subscribeToUserInterests 
+} from "@/lib/services/portalService";
+import { useToast } from "@/hooks/use-toast";
 
 export default function JobsPage() {
   const searchParams = useSearchParams();
@@ -15,6 +23,11 @@ export default function JobsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLevelsOpen, setIsLevelsOpen] = useState(true);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
+  const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(new Set());
+  const [loadingBookmarks, setLoadingBookmarks] = useState<Set<string>>(new Set());
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   // Load jobs from Firebase
   useEffect(() => {
@@ -39,6 +52,60 @@ export default function JobsPage() {
     };
     loadJobs();
   }, []);
+
+  // Subscribe to user's bookmarked jobs
+  useEffect(() => {
+    if (!user) {
+      setBookmarkedJobs(new Set());
+      return;
+    }
+
+    const unsubscribe = subscribeToUserInterests(user.uid, (interests) => {
+      const bookmarked = new Set(interests.map(interest => interest.jobId));
+      setBookmarkedJobs(bookmarked);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const toggleFavorite = async (jobId: string) => {
+    if (!user) {
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    const isBookmarked = bookmarkedJobs.has(jobId);
+    setLoadingBookmarks(prev => new Set(prev).add(jobId));
+
+    try {
+      if (isBookmarked) {
+        await deleteJobInterest(user.uid, jobId);
+        toast({
+          title: "Removed from bookmarks",
+          description: "Job has been removed from your bookmarks.",
+        });
+      } else {
+        await addJobInterest(user.uid, jobId, 'interested');
+        toast({
+          title: "Added to bookmarks",
+          description: "Job has been added to your bookmarks. View it in your Portal.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error toggling bookmark:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update bookmark. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingBookmarks(prev => {
+        const next = new Set(prev);
+        next.delete(jobId);
+        return next;
+      });
+    }
+  };
 
   // Filter jobs based on role and category
   let filteredJobs = [...jobs];
@@ -355,26 +422,40 @@ export default function JobsPage() {
                           <span className="text-xs text-gray-500">
                             ⏰ Deadline: {job.applicationDeadline || "N/A"}
                           </span>
-                          <Link
-                            href={`/jobs/${job.id}`}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                          >
-                            View Details
-                            <svg
-                              className="w-4 h-4 ml-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => toggleFavorite(job.jobId || job.id?.toString() || '')}
+                              disabled={loadingBookmarks.has(job.jobId || job.id?.toString() || '')}
+                              className="text-gray-400 hover:text-red-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              aria-label={bookmarkedJobs.has(job.jobId || job.id?.toString() || '') ? "Remove from bookmarks" : "Add to bookmarks"}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
+                              <Heart
+                                size={18}
+                                fill={bookmarkedJobs.has(job.jobId || job.id?.toString() || '') ? "currentColor" : "none"}
+                                className={bookmarkedJobs.has(job.jobId || job.id?.toString() || '') ? 'text-red-500' : ''}
                               />
-                            </svg>
-                          </Link>
+                            </button>
+                            <Link
+                              href={`/jobs/${job.jobId || job.id}`}
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                            >
+                              View Details
+                              <svg
+                                className="w-4 h-4 ml-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -397,6 +478,11 @@ export default function JobsPage() {
           </div>
         </div>
       </main>
+      <AuthDialog 
+        open={authDialogOpen} 
+        onOpenChange={setAuthDialogOpen}
+        defaultTab="login"
+      />
     </div>
   );
 }

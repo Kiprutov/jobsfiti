@@ -34,6 +34,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/portal" className="text-gray-400 hover:text-primary">
+                  Portal
+                </Link>
+              </li>
+              <li>
                 <Link href="/scholarships" className="text-gray-400 hover:text-primary">
                   Scholarships
                 </Link>

@@ -1,0 +1,11 @@
+node_modules
+.next
+.env.local
+.env*.local
+firebase.json
+firestore.rules
+firestore.rules.production
+firestore.indexes.json
+*.log
+.DS_Store
+

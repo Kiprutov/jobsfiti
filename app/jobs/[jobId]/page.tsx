@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { FirestoreJob, getJobById, getJobs } from "@/lib/services/jobsService";
 import {
   ArrowLeft,
@@ -11,10 +12,17 @@ import {
   DollarSign,
   MapPin,
   Users,
-  Loader2
+  Loader2,
+  BookmarkPlus
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { 
+  addJobInterest, 
+  getInterestByJob, 
+  updateJobInterestStatus,
+  JobInterestStatus 
+} from "@/lib/services/portalService";
 
 // Define a type for the job data we expect from Firestore
 type JobDetails = FirestoreJob & {
@@ -74,6 +82,9 @@ export default function JobDetailsPage() {
   const [similarJobs, setSimilarJobs] = useState<FirestoreJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentInterest, setCurrentInterest] = useState<{ status: JobInterestStatus } | null>(null);
+  const [isAddingToPortal, setIsAddingToPortal] = useState(false);
+  const { user } = useAuth();
   const jobId = params?.jobId ? String(params.jobId) : "";
 
   // Fetch job details
@@ -94,6 +105,18 @@ export default function JobDetailsPage() {
           return;
         }
         setJob(jobData as JobDetails);
+        
+        // Check if job is already in portal (only if user is authenticated)
+        if (user) {
+          try {
+            const interest = await getInterestByJob(user.uid, jobId);
+            if (interest) {
+              setCurrentInterest({ status: interest.status });
+            }
+          } catch (error) {
+            console.error('Error checking interest:', error);
+          }
+        }
       } catch (err) {
         console.error("Error fetching job:", err);
         setError("Failed to load job details");
@@ -437,7 +460,7 @@ export default function JobDetailsPage() {
                     ) : null}
 
                     {job.link ? (
-                      <div className="pt-2">
+                      <div className="pt-2 flex gap-3">
                         <a
                           href={job.link}
                           target="_blank"
@@ -446,8 +469,65 @@ export default function JobDetailsPage() {
                         >
                           Apply Now
                         </a>
+                        <button
+                          onClick={async () => {
+                            if (!job || !user) return;
+                            setIsAddingToPortal(true);
+                            try {
+                              if (currentInterest) {
+                                return;
+                              } else {
+                                await addJobInterest(user.uid, jobId, 'interested', undefined, job.applicationDeadline);
+                                setCurrentInterest({ status: 'interested' });
+                              }
+                            } catch (error) {
+                              console.error('Error adding to portal:', error);
+                            } finally {
+                              setIsAddingToPortal(false);
+                            }
+                          }}
+                          disabled={isAddingToPortal || !user}
+                          className={`inline-flex items-center gap-2 px-4 py-3 rounded-md transition-colors duration-200 ${
+                            currentInterest
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          <BookmarkPlus className="h-4 w-4" />
+                          {currentInterest ? 'In Portal' : user ? 'Add to Portal' : 'Sign in to bookmark'}
+                        </button>
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="pt-2">
+                        <button
+                          onClick={async () => {
+                            if (!job || !user) return;
+                            setIsAddingToPortal(true);
+                            try {
+                              if (currentInterest) {
+                                return;
+                              } else {
+                                await addJobInterest(user.uid, jobId, 'interested', undefined, job.applicationDeadline);
+                                setCurrentInterest({ status: 'interested' });
+                              }
+                            } catch (error) {
+                              console.error('Error adding to portal:', error);
+                            } finally {
+                              setIsAddingToPortal(false);
+                            }
+                          }}
+                          disabled={isAddingToPortal || !user}
+                          className={`inline-flex items-center gap-2 px-4 py-3 rounded-md transition-colors duration-200 ${
+                            currentInterest
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          <BookmarkPlus className="h-4 w-4" />
+                          {currentInterest ? 'In Portal' : user ? 'Add to Portal' : 'Sign in to bookmark'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

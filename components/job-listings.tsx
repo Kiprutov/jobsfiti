@@ -4,12 +4,25 @@ import { useState, useEffect } from "react"
 import { Heart, MapPin } from "lucide-react"
 import Link from "next/link"
 import { getJobs } from "@/lib/services/jobsService"
-import { FirestoreJob, getJobById } from "@/lib/services/jobsService"
+import { FirestoreJob } from "@/lib/services/jobsService"
+import { useAuth } from "@/lib/contexts/AuthContext"
+import { AuthDialog } from "@/components/auth/AuthDialog"
+import { 
+  addJobInterest, 
+  deleteJobInterest, 
+  subscribeToUserInterests,
+  isJobBookmarked 
+} from "@/lib/services/portalService"
+import { useToast } from "@/hooks/use-toast"
 
 export default function JobListings() {
   const [jobs, setJobs] = useState<FirestoreJob[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [favorites, setFavorites] = useState<string[]>([])
+  const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(new Set())
+  const [loadingBookmarks, setLoadingBookmarks] = useState<Set<string>>(new Set())
+  const [authDialogOpen, setAuthDialogOpen] = useState(false)
+  const { user, loading: authLoading } = useAuth()
+  const { toast } = useToast()
   
   // Get job ID - always use jobId field
   const getJobId = (job: FirestoreJob): string => {
@@ -25,31 +38,9 @@ export default function JobListings() {
       try {
         setIsLoading(true)
         const jobsData = await getJobs()
-        console.log('Raw jobs data from Firestore:', JSON.stringify(jobsData, null, 2));
         
         // Only show open jobs
         const openJobs = jobsData.filter(job => job.status === 'open')
-        console.log('Open jobs:', openJobs);
-        
-        // Log the first job's ID and all its properties
-        if (openJobs.length > 0) {
-          const firstJob = openJobs[0];
-          console.log('First job ID:', firstJob.id, 'Type:', typeof firstJob.id);
-          console.log('First job data:', JSON.stringify(firstJob, null, 2));
-          
-          // Check if the job has a document ID field
-          const jobKeys = Object.keys(firstJob);
-          console.log('Job object keys:', jobKeys);
-          
-          // Check for common ID field names
-          const possibleIdFields = ['id', 'documentId', '_id', 'jobId'];
-          possibleIdFields.forEach(field => {
-            if (field in firstJob) {
-              console.log(`Found ID field '${field}':`, firstJob[field as keyof typeof firstJob]);
-            }
-          });
-        }
-        
         setJobs(openJobs.slice(0, 6)) // Show only first 6 jobs on homepage
       } catch (error) {
         console.error('Failed to load jobs:', error)
@@ -60,11 +51,60 @@ export default function JobListings() {
     loadJobs()
   }, [])
 
-  const toggleFavorite = (id: string) => {
-    if (favorites.includes(id)) {
-      setFavorites(favorites.filter((favId) => favId !== id))
-    } else {
-      setFavorites([...favorites, id])
+  // Subscribe to user's bookmarked jobs
+  useEffect(() => {
+    if (!user) {
+      setBookmarkedJobs(new Set())
+      return
+    }
+
+    const unsubscribe = subscribeToUserInterests(user.uid, (interests) => {
+      const bookmarked = new Set(interests.map(interest => interest.jobId))
+      setBookmarkedJobs(bookmarked)
+    })
+
+    return () => unsubscribe()
+  }, [user])
+
+  const toggleFavorite = async (jobId: string) => {
+    // Check authentication
+    if (!user) {
+      setAuthDialogOpen(true)
+      return
+    }
+
+    // Check if already bookmarked
+    const isBookmarked = bookmarkedJobs.has(jobId)
+    
+    setLoadingBookmarks(prev => new Set(prev).add(jobId))
+
+    try {
+      if (isBookmarked) {
+        await deleteJobInterest(user.uid, jobId)
+        toast({
+          title: "Removed from bookmarks",
+          description: "Job has been removed from your bookmarks.",
+        })
+      } else {
+        await addJobInterest(user.uid, jobId, 'interested')
+        toast({
+          title: "Added to bookmarks",
+          description: "Job has been added to your bookmarks. View it in your Portal.",
+        })
+      }
+    } catch (error: any) {
+      console.error('Error toggling bookmark:', error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update bookmark. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingBookmarks(prev => {
+        const next = new Set(prev)
+        next.delete(jobId)
+        return next
+      })
     }
   }
 
@@ -150,13 +190,14 @@ export default function JobListings() {
                     <div className="flex items-center">
                       <button
                         onClick={() => toggleFavorite(job.jobId)}
-                        className="mr-4 text-gray-400 hover:text-red-500 transition-colors duration-200"
-                        aria-label="Add to favorites"
+                        disabled={loadingBookmarks.has(job.jobId)}
+                        className="mr-4 text-gray-400 hover:text-red-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={bookmarkedJobs.has(job.jobId) ? "Remove from bookmarks" : "Add to bookmarks"}
                       >
                         <Heart
                           size={18}
-                          fill={favorites.includes(job.jobId) ? "currentColor" : "none"}
-                          className={favorites.includes(job.jobId) ? 'text-red-500' : ''}
+                          fill={bookmarkedJobs.has(job.jobId) ? "currentColor" : "none"}
+                          className={bookmarkedJobs.has(job.jobId) ? 'text-red-500' : ''}
                         />
                       </button>
                       <Link 
@@ -201,6 +242,11 @@ export default function JobListings() {
           )}
         </div>
       </div>
+      <AuthDialog 
+        open={authDialogOpen} 
+        onOpenChange={setAuthDialogOpen}
+        defaultTab="login"
+      />
     </section>
   )
 }
