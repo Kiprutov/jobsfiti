@@ -1,4 +1,5 @@
 import { CheckCircle2 } from "lucide-react"
+import { OurStoryCarousel } from "@/components/our-story-carousel"
 
 export default function AboutPage() {
   const values = [
@@ -52,12 +53,7 @@ export default function AboutPage() {
               to discover exceptional talent. Our commitment to transparency and excellence drives everything we do.
             </p>
           </div>
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-md h-80 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-5xl font-bold text-blue-600 mb-2">Our Story</div>
-              <p className="text-slate-600">Built by professionals, for professionals</p>
-            </div>
-          </div>
+          <OurStoryCarousel />
         </div>
       </section>
 

@@ -3,8 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import ScrollHandler from "@/components/ScrollHandler"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
+import ConditionalLayout from "@/components/ConditionalLayout"
 import { Toaster } from "@/components/ui/toaster"
 import SearchParamsProvider from "@/components/SearchParamsWrapper"
 
@@ -37,12 +36,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <SearchParamsProvider>
           <ScrollHandler />
-          <Navbar />
-          <main className="min-h-screen">
+          <ConditionalLayout>
             {children}
-          </main>
+          </ConditionalLayout>
           <Toaster />
-          <Footer />
         </SearchParamsProvider>
       </body>
     </html>

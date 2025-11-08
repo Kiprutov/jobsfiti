@@ -57,7 +57,7 @@ export default function ScholarshipsPage() {
     {
       question: "Who is eligible to apply?",
       answer:
-        "Most of our scholarships are open to professionals and recent graduates. Specific eligibility criteria are listed for each scholarship. Some require proof of employment or educational background.",
+        "Eligibility varies by scholarship. Most listed scholarships are open to professionals and recent graduates. Specific eligibility criteria are listed for each scholarship. Some require proof of employment or educational background.",
     },
     {
       question: "How do I apply?",
@@ -72,7 +72,7 @@ export default function ScholarshipsPage() {
     {
       question: "How will winners be selected?",
       answer:
-        "Our selection committee reviews all applications based on merit, academic/professional achievement, impact potential, and alignment with scholarship goals.",
+        "Selection processes vary by scholarship provider. Each scholarship organization has its own selection criteria, typically based on merit, academic/professional achievement, impact potential, and alignment with scholarship goals.",
     },
     {
       question: "Can I apply for multiple scholarships?",
@@ -92,9 +92,9 @@ export default function ScholarshipsPage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
           <div className="max-w-7xl mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">JobsFiti Scholarships</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">Scholarships</h1>
             <p className="text-xl text-blue-100 mb-0">
-              Invest in your future with our educational and career development scholarships
+              Discover educational and career development scholarship opportunities to invest in your future
             </p>
           </div>
         </section>
@@ -103,7 +103,7 @@ export default function ScholarshipsPage() {
         <section className="max-w-7xl mx-auto px-4 py-12">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-slate-900 mb-1">Available Scholarships</h2>
-            <p className="text-slate-600 text-sm">Browse our current scholarship opportunities and apply today</p>
+            <p className="text-slate-600 text-sm">Browse current scholarship opportunities and apply today</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -140,34 +140,33 @@ export default function ScholarshipsPage() {
       {/* Why Choose Our Scholarships */}
       <section className="bg-slate-50 py-20">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Why Choose JobsFiti Scholarships?</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Why Browse Scholarships Here?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg p-8 shadow-sm text-center">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="text-blue-600" size={32} />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Prestigious Recognition</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Curated Opportunities</h3>
               <p className="text-slate-600">
-                Our scholarships are recognized by leading employers and educational institutions across Africa.
+                We carefully select and list scholarships that are recognized by leading employers and educational institutions across Africa.
               </p>
             </div>
             <div className="bg-white rounded-lg p-8 shadow-sm text-center">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BookOpen className="text-blue-600" size={32} />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Comprehensive Support</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Easy Access</h3>
               <p className="text-slate-600">
-                Beyond funding, we offer mentorship, career guidance, and networking opportunities with industry
-                leaders.
+                Find all scholarship opportunities in one place with clear eligibility requirements and application deadlines.
               </p>
             </div>
             <div className="bg-white rounded-lg p-8 shadow-sm text-center">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingUp className="text-blue-600" size={32} />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Career Growth</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Updated Listings</h3>
               <p className="text-slate-600">
-                Our scholarship programs include job placement assistance and career development resources.
+                Stay informed with regularly updated scholarship listings across various fields and career paths.
               </p>
             </div>
           </div>
