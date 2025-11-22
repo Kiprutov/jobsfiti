@@ -1,10 +1,10 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -32,6 +32,7 @@ export const convertToTimestamp = (dateString: string): Timestamp | null => {
 
 // Collection references
 export const jobsCollection = collection(db, 'jobs');
+export const companiesCollection = collection(db, 'companies');
 
 // Generic Firestore helpers
 export const createDocument = async <T extends Record<string, any>>(
@@ -72,7 +73,7 @@ export const getDocument = async <T>(
 ): Promise<T | null> => {
   const docRef = doc(collectionRef, docId);
   const docSnap = await getDoc(docRef);
-  
+
   if (docSnap.exists()) {
     return {
       id: docSnap.id,
@@ -88,7 +89,7 @@ export const getDocuments = async <T extends Record<string, any>>(
 ): Promise<(T & { id: string })[]> => {
   const q = query(collectionRef, ...constraints);
   const querySnapshot = await getDocs(q);
-  
+
   return querySnapshot.docs.map((docSnap) => {
     const data = docSnap.data();
     return {

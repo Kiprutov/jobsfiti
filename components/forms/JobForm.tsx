@@ -40,7 +40,7 @@ export interface JobFormData {
   companyDescription: string
   companyWebsite: string
   logo: string
-  
+
   // Job Details
   role: string
   category: string
@@ -49,13 +49,13 @@ export interface JobFormData {
   industry: string
   experienceLevel: ExperienceLevel
   employmentType: EmploymentType
-  
+
   // Location
   location: string
   isRemote: boolean
   remoteAllowed: boolean
   workFromHomePolicy: string
-  
+
   // Compensation
   payout: string
   salaryRange: {
@@ -67,14 +67,14 @@ export interface JobFormData {
   }
   bonusPotential: string
   equityOffered: boolean
-  
+
   // Application
   link: string
   applicationDeadline: string
   applicationProcess: string[]
   applicationRequirements: string[]
   requiredDocuments: string[]
-  
+
   // Requirements
   requirements: {
     education: EducationRequirement[]
@@ -90,7 +90,7 @@ export interface JobFormData {
     softSkills: string[]
   }
   requirementsText?: string
-  
+
   // Benefits & Perks
   benefits: {
     healthInsurance: boolean
@@ -104,14 +104,14 @@ export interface JobFormData {
     relocationAssistance: boolean
     otherBenefits: string[]
   }
-  
+
   // Company Culture
   companyCulture: {
     values: string[]
     workEnvironment: string
     diversityInclusion: string
   }
-  
+
   // Additional Metadata
   isSponsored: boolean
   sponsoredBy: string
@@ -121,6 +121,21 @@ export interface JobFormData {
   hiringManager: string
   status: "open" | "closed" | "paused" | "draft"
   keywords: string[]
+
+  // New Architecture Fields
+  companyId?: string
+  slug?: string
+  seo?: {
+    title?: string
+    description?: string
+  }
+  internalNotes?: string
+  audit?: {
+    createdBy?: string
+    updatedBy?: string
+    views: number
+    applications: number
+  }
 }
 
 interface JobFormProps {
@@ -139,7 +154,7 @@ export const initialFormData: Omit<JobFormData, 'id'> = {
   companyDescription: "",
   companyWebsite: "",
   logo: "",
-  
+
   // Job Details
   role: "",
   category: "",
@@ -148,13 +163,13 @@ export const initialFormData: Omit<JobFormData, 'id'> = {
   industry: "",
   experienceLevel: "mid-senior",
   employmentType: "full-time",
-  
+
   // Location
   location: "",
   isRemote: false,
   remoteAllowed: true,
   workFromHomePolicy: "",
-  
+
   // Compensation
   payout: "",
   salaryRange: {
@@ -166,14 +181,14 @@ export const initialFormData: Omit<JobFormData, 'id'> = {
   },
   bonusPotential: "",
   equityOffered: false,
-  
+
   // Application
   link: "",
   applicationDeadline: "",
   applicationProcess: [],
   applicationRequirements: [],
   requiredDocuments: [],
-  
+
   // Requirements
   requirements: {
     education: [{ degree: "", fieldOfStudy: "", required: true, id: Date.now().toString() }],
@@ -185,7 +200,7 @@ export const initialFormData: Omit<JobFormData, 'id'> = {
     softSkills: []
   },
   requirementsText: "",
-  
+
   // Benefits & Perks
   benefits: {
     healthInsurance: false,
@@ -199,14 +214,14 @@ export const initialFormData: Omit<JobFormData, 'id'> = {
     relocationAssistance: false,
     otherBenefits: []
   },
-  
+
   // Company Culture
   companyCulture: {
     values: [],
     workEnvironment: "",
     diversityInclusion: ""
   },
-  
+
   // Additional Metadata
   isSponsored: false,
   sponsoredBy: "",
@@ -252,7 +267,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
         ...updatedEducation[index],
         [field]: value
       };
-      
+
       return {
         ...prev,
         requirements: {
@@ -267,7 +282,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
     setFormData(prev => {
       const updatedEducation = [...(prev.requirements.education || [])];
       updatedEducation.splice(index, 1);
-      
+
       return {
         ...prev,
         requirements: {
@@ -280,13 +295,13 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     // Required fields validation
     if (!formData.title.trim()) newErrors.title = 'Job title is required';
     if (!formData.companyName.trim()) newErrors.companyName = 'Company name is required';
     if (!formData.description.trim()) newErrors.description = 'Job description is required';
     if (!formData.location.trim()) newErrors.location = 'Location is required';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -304,7 +319,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => {
@@ -363,7 +378,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
               <TabsTrigger value="requirements">Requirements</TabsTrigger>
               <TabsTrigger value="benefits">Benefits</TabsTrigger>
             </TabsList>
-            
+
             {/* Basic Information Tab */}
             <TabsContent value="basic" className="space-y-4">
               <h3 className="text-lg font-medium">Basic Information</h3>
@@ -408,7 +423,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   <Label htmlFor="employmentType">Employment Type *</Label>
                   <Select
                     value={formData.employmentType}
-                    onValueChange={(value) => setFormData({...formData, employmentType: value as EmploymentType})}
+                    onValueChange={(value) => setFormData({ ...formData, employmentType: value as EmploymentType })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select employment type" />
@@ -423,7 +438,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   </Select>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Job Description *</Label>
                 <Textarea
@@ -436,7 +451,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="detailedDescription">Detailed Description</Label>
                 <Textarea
@@ -449,7 +464,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                 />
               </div>
             </TabsContent>
-            
+
             {/* Job Details Tab */}
             <TabsContent value="details" className="space-y-4">
               <h3 className="text-lg font-medium">Job Details</h3>
@@ -478,7 +493,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   <Label htmlFor="experienceLevel">Experience Level</Label>
                   <Select
                     value={formData.experienceLevel}
-                    onValueChange={(value) => setFormData({...formData, experienceLevel: value as ExperienceLevel})}
+                    onValueChange={(value) => setFormData({ ...formData, experienceLevel: value as ExperienceLevel })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select experience level" />
@@ -504,28 +519,28 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-4 pt-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="isRemote" 
-                    checked={formData.isRemote} 
-                    onCheckedChange={(checked) => setFormData({...formData, isRemote: !!checked})}
+                  <Checkbox
+                    id="isRemote"
+                    checked={formData.isRemote}
+                    onCheckedChange={(checked) => setFormData({ ...formData, isRemote: !!checked })}
                   />
                   <Label htmlFor="isRemote">This is a remote position</Label>
                 </div>
-                
+
                 {formData.isRemote && (
                   <div className="space-y-2 pl-6">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="remoteAllowed" 
-                        checked={formData.remoteAllowed} 
-                        onCheckedChange={(checked) => setFormData({...formData, remoteAllowed: !!checked})}
+                      <Checkbox
+                        id="remoteAllowed"
+                        checked={formData.remoteAllowed}
+                        onCheckedChange={(checked) => setFormData({ ...formData, remoteAllowed: !!checked })}
                       />
                       <Label htmlFor="remoteAllowed">Remote work allowed</Label>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="workFromHomePolicy">Work From Home Policy</Label>
                       <Textarea
@@ -540,7 +555,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-4 pt-2">
                 <h4 className="font-medium">Salary Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -570,11 +585,11 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Label htmlFor="salaryRange.currency">Currency</Label>
                     <Select
                       value={formData.salaryRange.currency}
-                      onValueChange={(value) => 
+                      onValueChange={(value) =>
                         setFormData({
-                          ...formData, 
+                          ...formData,
                           salaryRange: {
-                            ...formData.salaryRange, 
+                            ...formData.salaryRange,
                             currency: value
                           }
                         })
@@ -593,14 +608,14 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="salaryRange.isEstimate" 
-                    checked={formData.salaryRange.isEstimate} 
-                    onCheckedChange={(checked) => 
+                  <Checkbox
+                    id="salaryRange.isEstimate"
+                    checked={formData.salaryRange.isEstimate}
+                    onCheckedChange={(checked) =>
                       setFormData({
-                        ...formData, 
+                        ...formData,
                         salaryRange: {
-                          ...formData.salaryRange, 
+                          ...formData.salaryRange,
                           isEstimate: !!checked
                         }
                       })
@@ -610,11 +625,11 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                 </div>
               </div>
             </TabsContent>
-            
+
             {/* Requirements Tab */}
             <TabsContent value="requirements" className="space-y-4">
               <h3 className="text-lg font-medium">Job Requirements</h3>
-              
+
               <div className="space-y-4">
                 <h4 className="font-medium">Education Requirements</h4>
                 {formData.requirements.education.map((edu, index) => (
@@ -636,7 +651,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                       />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
+                      <Checkbox
                         id={`edu-required-${index}`}
                         checked={edu.required}
                         onCheckedChange={(checked) => updateEducationRequirement(index, 'required', checked)}
@@ -665,7 +680,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   Add Education Requirement
                 </Button>
               </div>
-              
+
               <div className="space-y-4 pt-4">
                 <h4 className="font-medium">Experience Requirements</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -674,7 +689,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Input
                       type="number"
                       value={formData.requirements.experience.years}
-                      onChange={(e) => 
+                      onChange={(e) =>
                         setFormData({
                           ...formData,
                           requirements: {
@@ -692,7 +707,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4 pt-4">
                 <h4 className="font-medium">Skills</h4>
                 <div className="space-y-4">
@@ -745,7 +760,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label>Soft Skills</Label>
                     <div className="flex flex-wrap gap-2">
@@ -798,19 +813,19 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                 </div>
               </div>
             </TabsContent>
-            
+
             {/* Benefits Tab */}
             <TabsContent value="benefits" className="space-y-4">
               <h3 className="text-lg font-medium">Benefits & Perks</h3>
-              
+
               <div className="space-y-4">
                 <h4 className="font-medium">Standard Benefits</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="healthInsurance"
                       checked={formData.benefits.healthInsurance}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({
                           ...formData,
                           benefits: {
@@ -823,10 +838,10 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Label htmlFor="healthInsurance">Health Insurance</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="retirementPlans"
                       checked={formData.benefits.retirementPlans}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({
                           ...formData,
                           benefits: {
@@ -839,10 +854,10 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Label htmlFor="retirementPlans">Retirement Plans</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="paidTimeOff"
                       checked={formData.benefits.paidTimeOff}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({
                           ...formData,
                           benefits: {
@@ -855,10 +870,10 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Label htmlFor="paidTimeOff">Paid Time Off</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="flexibleHours"
                       checked={formData.benefits.flexibleHours}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({
                           ...formData,
                           benefits: {
@@ -871,10 +886,10 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Label htmlFor="flexibleHours">Flexible Hours</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="remoteWorkOptions"
                       checked={formData.benefits.remoteWorkOptions}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({
                           ...formData,
                           benefits: {
@@ -887,10 +902,10 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                     <Label htmlFor="remoteWorkOptions">Remote Work Options</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="professionalDevelopment"
                       checked={formData.benefits.professionalDevelopment}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         setFormData({
                           ...formData,
                           benefits: {
@@ -904,7 +919,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4 pt-4">
                 <h4 className="font-medium">Additional Benefits</h4>
                 <div className="space-y-2">
@@ -958,7 +973,7 @@ export function JobForm({ initialData, onSave, onCancel, isSubmitting = false }:
               </div>
             </TabsContent>
           </Tabs>
-          
+
           <div className="flex justify-end gap-4 pt-6 border-t mt-6">
             <Button
               type="button"

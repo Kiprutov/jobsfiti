@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import { JobInterestCard } from "@/components/portal/JobInterestCard"
 import { AlertSection } from "@/components/portal/AlertSection"
 import { CoverageRateCard } from "@/components/portal/CoverageRateCard"
@@ -16,7 +17,213 @@ import { JobInterest } from "@/lib/types/jobInterest"
 import { FirestoreJob } from "@/lib/services/jobsService"
 import { useAuth } from "@/lib/contexts/AuthContext"
 import { useRouter } from "next/navigation"
-import { Briefcase, AlertCircle, TrendingUp, FileText } from "lucide-react"
+import { Briefcase, AlertCircle, TrendingUp, Sparkles, ArrowRight } from "lucide-react"
+import Link from "next/link"
+
+// Sample data for visualization
+const SAMPLE_DATA = {
+  interestsWithJobs: [
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job1",
+        status: "interested" as const,
+        createdAt: new Date("2025-11-20"),
+        updatedAt: new Date("2025-11-22"),
+        notes: [
+          { id: "1", text: "Great company culture, flexible work hours", timestamp: new Date("2025-11-20"), status: "interested" }
+        ],
+        statusHistory: [
+          { status: "interested" as const, timestamp: new Date("2025-11-20"), comment: "Found through LinkedIn" }
+        ]
+      },
+      job: {
+        jobId: "job1",
+        title: "Senior Frontend Developer",
+        companyName: "TechCorp Solutions",
+        location: "Nairobi, Kenya (Remote)",
+        applicationDeadline: "2025-11-30",
+        role: "senior" as const,
+        type: "full-time" as const
+      }
+    },
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job2",
+        status: "started" as const,
+        createdAt: new Date("2025-11-18"),
+        updatedAt: new Date("2025-11-21"),
+        notes: [
+          { id: "2", text: "Completed resume update, need to write cover letter", timestamp: new Date("2025-11-21"), status: "started" },
+          { id: "3", text: "Research shows good growth opportunities", timestamp: new Date("2025-11-18"), status: "interested" }
+        ],
+        statusHistory: [
+          { status: "interested" as const, timestamp: new Date("2025-11-18") },
+          { status: "started" as const, timestamp: new Date("2025-11-21"), comment: "Started application process" }
+        ]
+      },
+      job: {
+        jobId: "job2",
+        title: "Full Stack Engineer",
+        companyName: "InnovateLabs Kenya",
+        location: "Mombasa, Kenya (Hybrid)",
+        applicationDeadline: "2025-11-25",
+        role: "mid-level" as const,
+        type: "full-time" as const
+      }
+    },
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job3",
+        status: "applied" as const,
+        createdAt: new Date("2025-11-15"),
+        updatedAt: new Date("2025-11-19"),
+        notes: [
+          { id: "4", text: "Submitted application with portfolio link", timestamp: new Date("2025-11-19"), status: "applied" },
+          { id: "5", text: "Tailored resume for mobile development focus", timestamp: new Date("2025-11-17"), status: "started" }
+        ],
+        statusHistory: [
+          { status: "interested" as const, timestamp: new Date("2025-11-15") },
+          { status: "started" as const, timestamp: new Date("2025-11-17") },
+          { status: "applied" as const, timestamp: new Date("2025-11-19"), comment: "Application submitted" }
+        ]
+      },
+      job: {
+        jobId: "job3",
+        title: "Mobile Application Developer",
+        companyName: "Safaricom PLC",
+        location: "Nairobi, Kenya",
+        applicationDeadline: "2025-11-22",
+        role: "junior" as const,
+        type: "full-time" as const
+      }
+    },
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job4",
+        status: "interviewed" as const,
+        createdAt: new Date("2025-11-10"),
+        updatedAt: new Date("2025-11-21"),
+        notes: [
+          { id: "6", text: "Second round interview scheduled for Nov 28", timestamp: new Date("2025-11-21"), status: "interviewed" },
+          { id: "7", text: "First interview went well, discussed tech stack", timestamp: new Date("2025-11-18"), status: "interviewed" }
+        ],
+        statusHistory: [
+          { status: "interested" as const, timestamp: new Date("2025-11-10") },
+          { status: "started" as const, timestamp: new Date("2025-11-12") },
+          { status: "applied" as const, timestamp: new Date("2025-11-14") },
+          { status: "interviewed" as const, timestamp: new Date("2025-11-18"), comment: "Completed first round" }
+        ]
+      },
+      job: {
+        jobId: "job4",
+        title: "Backend Engineer - Node.js",
+        companyName: "Equity Bank",
+        location: "Nairobi, Kenya",
+        role: "mid-level" as const,
+        type: "full-time" as const
+      }
+    },
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job5",
+        status: "interested" as const,
+        createdAt: new Date("2025-11-22"),
+        updatedAt: new Date("2025-11-22"),
+        notes: [],
+        statusHistory: [
+          { status: "interested" as const, timestamp: new Date("2025-11-22") }
+        ]
+      },
+      job: {
+        jobId: "job5",
+        title: "DevOps Engineer",
+        companyName: "M-PESA Africa",
+        location: "Nairobi, Kenya (Remote)",
+        applicationDeadline: "2025-12-05",
+        role: "senior" as const,
+        type: "contract" as const
+      }
+    },
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job6",
+        status: "started" as const,
+        createdAt: new Date("2025-11-21"),
+        updatedAt: new Date("2025-11-22"),
+        notes: [
+          { id: "8", text: "Started filling out online application form", timestamp: new Date("2025-11-22"), status: "started" }
+        ],
+        statusHistory: [
+          { status: "interested" as const, timestamp: new Date("2025-11-21") },
+          { status: "started" as const, timestamp: new Date("2025-11-22") }
+        ]
+      },
+      job: {
+        jobId: "job6",
+        title: "React Native Developer",
+        companyName: "Twiga Foods",
+        location: "Nairobi, Kenya",
+        applicationDeadline: "2025-11-24",
+        role: "junior" as const,
+        type: "full-time" as const
+      }
+    }
+  ],
+  alerts: [
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job2",
+        status: "started" as const,
+        createdAt: new Date("2025-11-18"),
+        updatedAt: new Date("2025-11-21")
+      },
+      job: {
+        jobId: "job2",
+        title: "Full Stack Engineer",
+        companyName: "InnovateLabs Kenya",
+        location: "Mombasa, Kenya (Hybrid)",
+        applicationDeadline: "2025-11-25",
+        role: "mid-level" as const,
+        type: "full-time" as const
+      },
+      daysUntilDeadline: 3
+    },
+    {
+      interest: {
+        userId: "sample",
+        jobId: "job6",
+        status: "started" as const,
+        createdAt: new Date("2025-11-21"),
+        updatedAt: new Date("2025-11-22")
+      },
+      job: {
+        jobId: "job6",
+        title: "React Native Developer",
+        companyName: "Twiga Foods",
+        location: "Nairobi, Kenya",
+        applicationDeadline: "2025-11-24",
+        role: "junior" as const,
+        type: "full-time" as const
+      },
+      daysUntilDeadline: 2
+    }
+  ],
+  coverageRate: {
+    total: 6,
+    applied: 2,
+    started: 2,
+    interested: 2,
+    coverageRate: 67
+  }
+}
+
 
 export default function PortalPage() {
   const { user, loading: authLoading } = useAuth()
@@ -48,21 +255,17 @@ export default function PortalPage() {
 
   const loadPortalData = async () => {
     if (!user) return
-    
+
     try {
       setIsLoading(true)
-      
-      // Load all interests with their job data
-      const interestsData = await getInterestsWithJobs(user.uid)
-      setInterestsWithJobs(interestsData)
-      
-      // Load deadline alerts
-      const alertsData = await getJobsWithApproachingDeadlines(user.uid)
-      setAlerts(alertsData)
-      
-      // Calculate coverage rate
-      const coverage = await calculateCoverageRate(user.uid)
-      setCoverageRate(coverage)
+
+      // Using sample data for visualization
+      setInterestsWithJobs(SAMPLE_DATA.interestsWithJobs as any)
+      setAlerts(SAMPLE_DATA.alerts as any)
+      setCoverageRate(SAMPLE_DATA.coverageRate)
+
+      // Simulate loading delay
+      await new Promise(resolve => setTimeout(resolve, 500))
     } catch (error) {
       console.error("Error loading portal data:", error)
     } finally {
@@ -89,21 +292,21 @@ export default function PortalPage() {
     (item) => item.interest.status === "started"
   )
   const appliedJobs = interestsWithJobs.filter(
-    (item) => item.interest.status === "applied" || 
-             item.interest.status === "interviewed" ||
-             item.interest.status === "rejected" ||
-             item.interest.status === "accepted"
+    (item) => item.interest.status === "applied" ||
+      item.interest.status === "interviewed" ||
+      item.interest.status === "rejected" ||
+      item.interest.status === "accepted"
   )
 
   // Show loading while checking auth or loading data
   if (authLoading || (isLoading && !user)) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+      <div className="w-full px-8 md:px-16 py-12">
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <div className="relative">
+            <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-slate-800 animate-spin"></div>
           </div>
+          <p className="text-slate-600 font-medium animate-pulse">Loading your portal...</p>
         </div>
       </div>
     )
@@ -115,174 +318,158 @@ export default function PortalPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Portal</h1>
-        <p className="text-gray-600">
-          Manage your job interests, track application progress, and stay on top of deadlines
-        </p>
+    <div className="w-full min-h-screen bg-slate-50/30">
+      {/* Welcome Section */}
+      <div className="w-full bg-white border-b border-slate-200">
+        <div className="px-8 md:px-16 py-6 md:py-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-2">
+                Welcome back, {user.displayName?.split(' ')[0] || 'User'}
+              </h1>
+              <p className="text-slate-600 text-base md:text-lg max-w-3xl">
+                Track your applications, manage deadlines, and stay on top of your job search.
+              </p>
+            </div>
+            <Link href="/jobs">
+              <button className="group flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg transition-all font-medium text-sm shadow-sm">
+                <Sparkles className="w-4 h-4" />
+                Browse Jobs
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="h-6 bg-gray-200 rounded animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-32 bg-gray-200 rounded animate-pulse" />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <div className="h-6 bg-gray-200 rounded animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-32 bg-gray-200 rounded animate-pulse" />
-              </CardContent>
-            </Card>
-          </div>
+      <div className="px-2 md:px-16 py-8 space-y-8">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
+          <CoverageRateCard {...coverageRate} />
+          <AlertSection alerts={alerts} />
         </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CoverageRateCard {...coverageRate} />
-            <AlertSection alerts={alerts} />
-          </div>
 
-          {/* Main Content Tabs */}
-          <Tabs defaultValue="all" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                All ({interestsWithJobs.length})
-              </TabsTrigger>
-              <TabsTrigger value="interested" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                Interested ({interestedJobs.length})
-              </TabsTrigger>
-              <TabsTrigger value="started" className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Started ({startedJobs.length})
-              </TabsTrigger>
-              <TabsTrigger value="applied" className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Applied ({appliedJobs.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="space-y-4">
-              {interestsWithJobs.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center py-12">
-                      <Briefcase className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        No jobs tracked yet
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        Start tracking jobs you're interested in to manage your applications.
-                      </p>
-                      <a
-                        href="/jobs"
-                        className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                      >
-                        Browse Jobs
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {interestsWithJobs.map((item) => (
-                    <JobInterestCard
-                      key={item.interest.jobId}
-                      interest={item.interest}
-                      job={item.job}
-                      onUpdate={handleUpdate}
-                    />
-                  ))}
+        {/* Applications Section */}
+        <div className="bg-white rounded-md shadow-none md:shadow-sm border border-slate-200">
+          <Tabs defaultValue="all" className="w-full">
+            <div className="px-6 pt-6 pb-4 border-b border-slate-200">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900">Applications</h2>
+                  <p className="text-slate-500 text-sm mt-1">Manage and track your job applications</p>
                 </div>
-              )}
-            </TabsContent>
+                <TabsList className="bg-slate-100 p-1 rounded-lg">
+                  <TabsTrigger value="all" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 text-sm font-medium">
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger value="interested" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 text-sm font-medium">
+                    Saved
+                  </TabsTrigger>
+                  <TabsTrigger value="started" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 text-sm font-medium">
+                    In Progress
+                  </TabsTrigger>
+                  <TabsTrigger value="applied" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 text-sm font-medium">
+                    Applied
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
 
-            <TabsContent value="interested" className="space-y-4">
-              {interestedJobs.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center py-8 text-gray-500">
-                      No jobs marked as "Interested" yet.
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {interestedJobs.map((item) => (
-                    <JobInterestCard
-                      key={item.interest.jobId}
-                      interest={item.interest}
-                      job={item.job}
-                      onUpdate={handleUpdate}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+            <div className="p-6">
+              <TabsContent value="all" className="mt-0 space-y-4">
+                {interestsWithJobs.length === 0 ? (
+                  <EmptyState />
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {interestsWithJobs.map((item) => (
+                      <JobInterestCard
+                        key={item.interest.jobId}
+                        interest={item.interest}
+                        job={item.job}
+                        onUpdate={handleUpdate}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
 
-            <TabsContent value="started" className="space-y-4">
-              {startedJobs.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center py-8 text-gray-500">
-                      No jobs with "Started Application" status.
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {startedJobs.map((item) => (
-                    <JobInterestCard
-                      key={item.interest.jobId}
-                      interest={item.interest}
-                      job={item.job}
-                      onUpdate={handleUpdate}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+              <TabsContent value="interested" className="mt-0 space-y-4">
+                {interestedJobs.length === 0 ? (
+                  <EmptyState title="No saved jobs" description="Jobs you mark as 'Interested' will appear here." />
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {interestedJobs.map((item) => (
+                      <JobInterestCard
+                        key={item.interest.jobId}
+                        interest={item.interest}
+                        job={item.job}
+                        onUpdate={handleUpdate}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
 
-            <TabsContent value="applied" className="space-y-4">
-              {appliedJobs.length === 0 ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center py-8 text-gray-500">
-                      No jobs marked as "Applied" yet.
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {appliedJobs.map((item) => (
-                    <JobInterestCard
-                      key={item.interest.jobId}
-                      interest={item.interest}
-                      job={item.job}
-                      onUpdate={handleUpdate}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+              <TabsContent value="started" className="mt-0 space-y-4">
+                {startedJobs.length === 0 ? (
+                  <EmptyState title="No applications in progress" description="Jobs where you've started applying will appear here." />
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {startedJobs.map((item) => (
+                      <JobInterestCard
+                        key={item.interest.jobId}
+                        interest={item.interest}
+                        job={item.job}
+                        onUpdate={handleUpdate}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="applied" className="mt-0 space-y-4">
+                {appliedJobs.length === 0 ? (
+                  <EmptyState title="No submitted applications" description="Jobs you've applied to will appear here." />
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {appliedJobs.map((item) => (
+                      <JobInterestCard
+                        key={item.interest.jobId}
+                        interest={item.interest}
+                        job={item.job}
+                        onUpdate={handleUpdate}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </div>
           </Tabs>
-
-          {/* Interview Preparation Section */}
-          <InterviewPrepSection />
         </div>
-      )}
+
+
+      </div>
     </div>
   )
 }
 
+function EmptyState({ title = "No jobs tracked yet", description = "Start tracking jobs you're interested in to manage your applications." }: { title?: string, description?: string }) {
+  return (
+    <div className="text-center py-16 px-4 rounded-lg border border-slate-200 bg-slate-50/50">
+      <div className="bg-white p-4 rounded-full shadow-sm inline-block mb-4 border border-slate-200">
+        <Briefcase className="h-8 w-8 text-slate-400" />
+      </div>
+      <h3 className="text-base font-semibold text-slate-900 mb-2">
+        {title}
+      </h3>
+      <p className="text-slate-600 text-sm mb-6 max-w-sm mx-auto">
+        {description}
+      </p>
+      <Link href="/jobs">
+        <Button variant="outline" className="shadow-sm">
+          Browse Jobs
+        </Button>
+      </Link>
+    </div>
+  )
+}

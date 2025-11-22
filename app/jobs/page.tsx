@@ -7,10 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { AuthDialog } from "@/components/auth/AuthDialog";
-import { 
-  addJobInterest, 
-  deleteJobInterest, 
-  subscribeToUserInterests 
+import {
+  addJobInterest,
+  deleteJobInterest,
+  subscribeToUserInterests
 } from "@/lib/services/portalService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,8 +21,20 @@ export default function JobsPage() {
   const role = searchParams.get("role");
   const [jobs, setJobs] = useState<FirestoreJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLevelsOpen, setIsLevelsOpen] = useState(true);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
+  const [isLevelsOpen, setIsLevelsOpen] = useState(() => {
+    // Default to collapsed on small devices, open on large devices
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(() => {
+    // Default to collapsed on small devices, open on large devices
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
   const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(new Set());
   const [loadingBookmarks, setLoadingBookmarks] = useState<Set<string>>(new Set());
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -183,14 +195,13 @@ export default function JobsPage() {
 
   const summaryText =
     role && category
-      ? `${getRoleLabel()} jobs in ${getCategoryLabel()}: ${
-          filteredJobs.length
-        } available`
+      ? `${getRoleLabel()} jobs in ${getCategoryLabel()}: ${filteredJobs.length
+      } available`
       : role
-      ? `${getRoleLabel()} positions: ${filteredJobs.length} available`
-      : category
-      ? `${getCategoryLabel()} jobs: ${filteredJobs.length} available`
-      : `Showing all ${filteredJobs.length} jobs`;
+        ? `${getRoleLabel()} positions: ${filteredJobs.length} available`
+        : category
+          ? `${getCategoryLabel()} jobs: ${filteredJobs.length} available`
+          : `Showing all ${filteredJobs.length} jobs`;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -209,9 +220,8 @@ export default function JobsPage() {
 
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-2">
                   <button
-                    className={`w-full flex items-center justify-between rounded-md text-slate-900 transition-colors ${
-                      isLevelsOpen ? "px-3 py-2 hover:bg-slate-100 mb-3" : ""
-                    }`}
+                    className={`w-full flex items-center justify-between rounded-md text-slate-900 transition-colors ${isLevelsOpen ? "px-3 py-2 hover:bg-slate-100 mb-3" : ""
+                      }`}
                     onClick={() => setIsLevelsOpen(!isLevelsOpen)}
                     aria-expanded={isLevelsOpen}
                     aria-controls="levels-panel"
@@ -219,9 +229,8 @@ export default function JobsPage() {
                     <span className="text-base font-semibold">Job Levels</span>
                     <ChevronDown
                       size={20}
-                      className={`text-slate-500 transition-transform duration-200 ${
-                        isLevelsOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text-slate-500 transition-transform duration-200 ${isLevelsOpen ? "rotate-180" : ""
+                        }`}
                       aria-hidden="true"
                     />
                   </button>
@@ -229,11 +238,10 @@ export default function JobsPage() {
                     <div id="levels-panel" className="space-y-2">
                       <Link
                         href={category ? `/jobs?category=${category}` : "/jobs"}
-                        className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                          !role
+                        className={`block px-3 py-2 text-sm rounded-md transition-colors ${!role
                             ? "bg-blue-600 text-white"
                             : "text-slate-700 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         All Levels
                       </Link>
@@ -245,11 +253,10 @@ export default function JobsPage() {
                               ? `/jobs?role=${r.id}&category=${category}`
                               : `/jobs?role=${r.id}`
                           }
-                          className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                            role === r.id
+                          className={`block px-3 py-2 text-sm rounded-md transition-colors ${role === r.id
                               ? "bg-blue-600 text-white"
                               : "text-slate-700 hover:bg-slate-100"
-                          }`}
+                            }`}
                         >
                           <span className="flex justify-between items-center">
                             <span>{r.label}</span>
@@ -263,11 +270,10 @@ export default function JobsPage() {
 
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-2">
                   <button
-                    className={`w-full flex items-center justify-between rounded-md text-slate-900 transition-colors ${
-                      isCategoriesOpen
+                    className={`w-full flex items-center justify-between rounded-md text-slate-900 transition-colors ${isCategoriesOpen
                         ? "px-3 py-2 hover:bg-slate-100 mb-3"
                         : ""
-                    }`}
+                      }`}
                     onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
                     aria-expanded={isCategoriesOpen}
                     aria-controls="categories-panel"
@@ -275,9 +281,8 @@ export default function JobsPage() {
                     <span className="text-base font-semibold">Categories</span>
                     <ChevronDown
                       size={20}
-                      className={`text-slate-500 transition-transform duration-200 ${
-                        isCategoriesOpen ? "rotate-180" : ""
-                      }`}
+                      className={`text-slate-500 transition-transform duration-200 ${isCategoriesOpen ? "rotate-180" : ""
+                        }`}
                       aria-hidden="true"
                     />
                   </button>
@@ -285,11 +290,10 @@ export default function JobsPage() {
                     <div id="categories-panel" className="space-y-2">
                       <Link
                         href={role ? `/jobs?role=${role}` : "/jobs"}
-                        className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                          !category
+                        className={`block px-3 py-2 text-sm rounded-md transition-colors ${!category
                             ? "bg-blue-600 text-white"
                             : "text-slate-700 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         <span className="flex justify-between items-center">
                           <span>All Categories</span>
@@ -304,11 +308,10 @@ export default function JobsPage() {
                               ? `/jobs?role=${role}&category=${cat.id}`
                               : `/jobs?category=${cat.id}`
                           }
-                          className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                            category === cat.id
+                          className={`block px-3 py-2 text-sm rounded-md transition-colors ${category === cat.id
                               ? "bg-blue-600 text-white"
                               : "text-slate-700 hover:bg-slate-100"
-                          }`}
+                            }`}
                         >
                           <span className="flex justify-between items-center">
                             <span>{cat.label}</span>
@@ -478,8 +481,8 @@ export default function JobsPage() {
           </div>
         </div>
       </main>
-      <AuthDialog 
-        open={authDialogOpen} 
+      <AuthDialog
+        open={authDialogOpen}
         onOpenChange={setAuthDialogOpen}
         defaultTab="login"
       />

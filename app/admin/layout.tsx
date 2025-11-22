@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   LogOut,
-  FileText as FileTextIcon
+  FileText as FileTextIcon,
+  Loader2
 } from "lucide-react"
 
 interface NavItem {
@@ -27,7 +28,9 @@ interface NavItem {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   const navItems: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -41,9 +44,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
-      <aside 
+      <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 transition-all duration-300 ease-in-out shadow-xl",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 transition-all duration-300 ease-in-out",
           isCollapsed ? "-translate-x-full" : "translate-x-0"
         )}
         aria-label="Sidebar"
@@ -100,13 +103,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <p className="text-sm font-medium text-white truncate">Admin User</p>
                 <p className="text-xs text-slate-400 truncate">admin@jobsfiti.com</p>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-slate-400 hover:text-white hover:bg-slate-800"
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={async () => {
+                  setIsLoggingOut(true)
+                  // Add a small delay for better UX
+                  await new Promise(resolve => setTimeout(resolve, 1000))
+                  router.push('/')
+                }}
+                disabled={isLoggingOut}
+                className="text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-50"
                 aria-label="Sign out"
               >
-                <LogOut className="h-5 w-5" />
+                {isLoggingOut ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <LogOut className="h-5 w-5" />
+                )}
               </Button>
             </div>
           </div>
@@ -115,7 +129,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile Menu Overlay */}
       {!isCollapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setIsCollapsed(true)}
           aria-hidden="true"
@@ -136,14 +150,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Main Content */}
-      <div 
+      <div
         className={cn(
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out",
           isCollapsed ? "md:pl-0" : "md:pl-64"
         )}
       >
         {/* Page Content */}
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {children}
         </main>
       </div>

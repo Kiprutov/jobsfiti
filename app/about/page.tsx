@@ -1,4 +1,4 @@
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Mail, Phone, GraduationCap, Code, Award, MapPin, Linkedin } from "lucide-react"
 import { OurStoryCarousel } from "@/components/our-story-carousel"
 
 export default function AboutPage() {
@@ -63,7 +63,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-slate-900 mb-12">Our Core Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <div key={index} className="bg-white rounded-md p-6 shadow-sm">
+              <div key={index} className="bg-white rounded-md p-6 border border-slate-200">
                 <CheckCircle2 className="text-blue-600 mb-4" size={32} />
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">{value.title}</h3>
                 <p className="text-slate-600 text-sm">{value.description}</p>
@@ -87,21 +87,122 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">Dedicated Team</h2>
-          <p className="text-slate-600 mb-8 max-w-2xl">
-            Our team consists of experienced professionals from recruitment, technology, and business backgrounds. We're
-            passionate about making job search better for everyone.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-md p-6 shadow-sm text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full mx-auto mb-4"></div>
-                <h3 className="text-lg font-semibold text-slate-900">Team Member {i}</h3>
-                <p className="text-slate-600 text-sm mt-1">Lead Professional</p>
+      <section className="bg-gradient-to-b from-slate-50 to-white py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="mb-16 text-center">
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">Meet Our Founder</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto text-lg leading-relaxed">
+              Passionate about making job search better for everyone, combining technology expertise with a commitment to connecting talented professionals with meaningful career opportunities.
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-12">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+                {/* Avatar */}
+                <div className="relative">
+                  <div className="w-40 h-40 bg-white rounded-md flex items-center justify-center">
+                    <span className="text-5xl font-bold bg-gradient-to-br from-blue-600 to-indigo-700 bg-clip-text text-transparent">VR</span>
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-white rounded-md p-2 border border-slate-200">
+                    <Award className="h-5 w-5 text-blue-600" />
+                  </div>
+                </div>
+                
+                {/* Header Info */}
+                <div className="flex-1 text-center md:text-left text-white">
+                  <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+                    <h3 className="text-3xl font-bold">Victor Rotich</h3>
+                    <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-md">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-xs font-medium">Verified</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-blue-100">
+                    <div className="flex items-center gap-2">
+                      <Code className="h-5 w-5" />
+                      <span className="font-semibold">Software Developer</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5" />
+                      <span>Bsc. Computer Science</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
+            
+            {/* Content Section */}
+            <div className="p-8 md:p-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Contact Information */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Contact Information</h4>
+                  
+                  <a 
+                    href="mailto:kiprutovictor@gmail.com" 
+                    className="group flex items-center gap-4 p-4 bg-slate-50 hover:bg-blue-50 rounded-md border border-slate-200 hover:border-blue-300 transition-all duration-200"
+                  >
+                    <div className="p-3 bg-blue-100 group-hover:bg-blue-200 rounded-md transition-colors">
+                      <Mail className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-500 mb-1">Email</p>
+                      <p className="text-sm font-medium text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                        kiprutovictor@gmail.com
+                      </p>
+                    </div>
+                  </a>
+                  
+                  <a 
+                    href="tel:+254701899724" 
+                    className="group flex items-center gap-4 p-4 bg-slate-50 hover:bg-blue-50 rounded-md border border-slate-200 hover:border-blue-300 transition-all duration-200"
+                  >
+                    <div className="p-3 bg-blue-100 group-hover:bg-blue-200 rounded-md transition-colors">
+                      <Phone className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-500 mb-1">Phone</p>
+                      <p className="text-sm font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
+                        +254 701 899 724
+                      </p>
+                    </div>
+                  </a>
+                </div>
+                
+                {/* Professional Details */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Professional Details</h4>
+                  
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-md border border-blue-100">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 rounded-md">
+                        <GraduationCap className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 mb-1">Education</p>
+                        <p className="text-sm font-semibold text-slate-900">Bachelor of Science</p>
+                        <p className="text-sm text-slate-700">Computer Science</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-md border border-slate-200">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-slate-200 rounded-md">
+                        <Code className="h-5 w-5 text-slate-700" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 mb-1">Role</p>
+                        <p className="text-sm font-semibold text-slate-900">Software Developer</p>
+                        <p className="text-sm text-slate-600">Full-Stack Development</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

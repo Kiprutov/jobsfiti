@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Heart, MapPin } from "lucide-react"
 import Link from "next/link"
-import { getJobs } from "@/lib/services/jobsService"
+import { getJobs, getJobById } from "@/lib/services/jobsService"
 import { FirestoreJob } from "@/lib/services/jobsService"
 import { useAuth } from "@/lib/contexts/AuthContext"
 import { AuthDialog } from "@/components/auth/AuthDialog"

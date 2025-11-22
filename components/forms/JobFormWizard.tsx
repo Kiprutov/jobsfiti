@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2, Plus, X, ChevronLeft, ChevronRight, Check } from "lucide-react"
 import { JobFormData, initialFormData } from "./JobForm"
+import { CompanySelection } from "./CompanySelection"
 import { addCategory as addCategoryService, getCategories as getCategoriesService, Category as CategoryItem } from "@/lib/services/categoriesService"
 import {
   step1Schema,
@@ -179,11 +180,10 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
             key={role.id}
             type="button"
             onClick={() => updateFormData({ role: role.id })}
-            className={`p-4 border-2 rounded-lg text-left transition-all ${
-              formData.role === role.id
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
+            className={`p-4 border-2 rounded-lg text-left transition-all ${formData.role === role.id
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-gray-200 hover:border-gray-300"
+              }`}
           >
             <div className="font-medium">{role.label}</div>
           </button>
@@ -224,11 +224,10 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
             key={category.id}
             type="button"
             onClick={() => updateFormData({ category: category.id })}
-            className={`p-4 border-2 rounded-lg text-left transition-all ${
-              formData.category === category.id
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
+            className={`p-4 border-2 rounded-lg text-left transition-all ${formData.category === category.id
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-gray-200 hover:border-gray-300"
+              }`}
           >
             <div className="font-medium">{category.label}</div>
           </button>
@@ -277,13 +276,10 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="companyName">Company Name *</Label>
-          <Input
-            id="companyName"
-            value={formData.companyName || ""}
-            onChange={(e) => updateFormData({ companyName: e.target.value })}
-            placeholder="e.g. Tech Solutions Inc."
-            required
+          <Label>Company *</Label>
+          <CompanySelection
+            value={formData.companyId}
+            onChange={(companyId) => updateFormData({ companyId })}
           />
         </div>
         <div className="space-y-2 md:col-span-2">
@@ -316,26 +312,6 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
             onChange={(e) => updateFormData({ detailedDescription: e.target.value })}
             placeholder="Additional detailed information about the role..."
             rows={4}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="companyWebsite">Company Website</Label>
-          <Input
-            id="companyWebsite"
-            type="url"
-            value={formData.companyWebsite || ""}
-            onChange={(e) => updateFormData({ companyWebsite: e.target.value })}
-            placeholder="https://company.com"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="logo">Company Logo URL</Label>
-          <Input
-            id="logo"
-            type="url"
-            value={formData.logo || ""}
-            onChange={(e) => updateFormData({ logo: e.target.value })}
-            placeholder="https://example.com/logo.png"
           />
         </div>
       </div>
@@ -469,6 +445,54 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
                 }}
                 placeholder={"e.g.\n1) Submit resume\n2) Phone interview\n3) Technical task"}
                 rows={5}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* SEO & Internal Settings */}
+        <div className="space-y-2 md:col-span-2 pt-4 border-t mt-4">
+          <h4 className="text-base font-semibold">SEO & Internal Settings</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="slug">URL Slug (Optional)</Label>
+              <Input
+                id="slug"
+                value={formData.slug || ""}
+                onChange={(e) => updateFormData({ slug: e.target.value })}
+                placeholder="e.g. senior-frontend-developer-remote"
+              />
+              <p className="text-xs text-gray-500">Leave empty to auto-generate from title.</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="internalNotes">Internal Notes</Label>
+              <Input
+                id="internalNotes"
+                value={formData.internalNotes || ""}
+                onChange={(e) => updateFormData({ internalNotes: e.target.value })}
+                placeholder="Private notes for the team..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="metaTitle">SEO Meta Title</Label>
+              <Input
+                id="metaTitle"
+                value={formData.seo?.title || ""}
+                onChange={(e) => updateFormData({
+                  seo: { ...formData.seo, title: e.target.value }
+                })}
+                placeholder="Custom title for search engines"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="metaDescription">SEO Meta Description</Label>
+              <Input
+                id="metaDescription"
+                value={formData.seo?.description || ""}
+                onChange={(e) => updateFormData({
+                  seo: { ...formData.seo, description: e.target.value }
+                })}
+                placeholder="Custom description for search engines"
               />
             </div>
           </div>
@@ -1067,55 +1091,76 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{initialData?.id ? "Edit Job" : "Create New Job"}</CardTitle>
-          <CardDescription>
-            Complete all steps to {initialData?.id ? 'update' : 'create'} a job listing.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Step Indicator */}
-          <div className="mb-8 flex items-center justify-between">
-            {STEPS.map((step) => (
-              <div key={step.number} className="flex flex-col items-center">
-                <div 
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    currentStep === step.number 
-                      ? 'bg-primary text-primary-foreground' 
-                      : currentStep > step.number 
-                        ? 'bg-green-100 text-green-600' 
-                        : 'bg-muted'
-                  }`}
-                >
-                  {currentStep > step.number ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <span className="text-sm font-medium">{step.number}</span>
-                  )}
+    <div className="absolute inset-0 flex flex-col bg-background">
+      {/* Sticky Header - Modern Stepper */}
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="px-8 py-2">
+          {/* Modern Stepper */}
+          <div className="flex items-center justify-between">
+            {STEPS.map((step, index) => (
+              <div key={step.number} className="flex items-center flex-1">
+                <div className="flex flex-col items-center relative">
+                  {/* Step Circle */}
+                  <div
+                    className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 ${currentStep === step.number
+                      ? 'bg-primary text-white shadow-lg scale-110'
+                      : currentStep > step.number
+                        ? 'bg-green-500 text-white'
+                        : 'bg-muted text-muted-foreground border-2 border-muted-foreground/20'
+                      }`}
+                  >
+                    {currentStep > step.number ? (
+                      <Check className="h-4 w-4 text-white" />
+                    ) : (
+                      <span className="text-xs font-semibold">{step.number}</span>
+                    )}
+                  </div>
+
+                  {/* Step Label */}
+                  <span className={`mt-1.5 text-xs font-medium text-center transition-colors ${currentStep === step.number
+                    ? 'text-primary'
+                    : currentStep > step.number
+                      ? 'text-green-600'
+                      : 'text-muted-foreground'
+                    }`}>
+                    {step.title}
+                  </span>
                 </div>
-                <span className={`mt-2 text-xs text-center ${
-                  currentStep === step.number ? 'font-medium' : 'text-muted-foreground'
-                }`}>
-                  {step.title}
-                </span>
+
+                {/* Connector Line */}
+                {index < STEPS.length - 1 && (
+                  <div className="flex-1 h-0.5 mx-2 mb-4">
+                    <div
+                      className={`h-full transition-all duration-300 ${currentStep > step.number
+                        ? 'bg-green-500'
+                        : 'bg-muted'
+                        }`}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
+        </div>
+      </div>
 
-          {/* Current Step Content */}
-          <div className="min-h-[400px]">
-            {renderCurrentStep()}
-          </div>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="px-8 py-8 min-h-full">
+          {renderCurrentStep()}
+        </div>
+      </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between pt-6 border-t mt-6">
+      {/* Sticky Footer - Navigation Buttons */}
+      <div className="sticky bottom-0 z-10 bg-background border-t">
+        <div className="px-8 pt-2 pb-0">
+          <div className="flex justify-between">
             <Button
               type="button"
               variant="outline"
               onClick={currentStep === 1 ? onCancel : handleBack}
               disabled={isSubmitting}
+              className="min-w-[100px]"
             >
               {currentStep === 1 ? (
                 "Cancel"
@@ -1129,19 +1174,29 @@ export function JobFormWizard({ initialData, onSave, onCancel, isSubmitting = fa
 
             <div className="flex gap-2">
               {currentStep < STEPS.length ? (
-                <Button type="button" onClick={handleNext} disabled={isSubmitting}>
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isSubmitting}
+                  className="min-w-[100px] text-white"
+                >
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="min-w-[120px] text-white"
+                >
                   {isSubmitting ? "Saving..." : initialData?.id ? "Update Job" : "Create Job"}
                 </Button>
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

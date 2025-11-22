@@ -53,27 +53,27 @@ export function CoverageRateCard({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
+    <Card className="bg-white border-slate-200 shadow-none md:shadow-sm rounded-md border">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <TrendingUp className="h-5 w-5 text-slate-700" />
           Coverage Rate
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm text-slate-600">
           Percentage of interested jobs you've applied to
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
-              Application Completion Rate
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-slate-700">
+              Application Completion
             </span>
-            <span className={`text-2xl font-bold ${getCoverageColor(coverageRate)}`}>
+            <span className={`text-3xl font-semibold ${getCoverageColor(coverageRate)}`}>
               {coverageRate}%
             </span>
           </div>
-          <div className="relative h-3 w-full overflow-hidden rounded-full bg-gray-200">
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-200">
             <div
               className={`h-full transition-all ${getProgressColor(coverageRate)}`}
               style={{ width: `${coverageRate}%` }}
@@ -81,45 +81,45 @@ export function CoverageRateCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-2 mb-2">
+        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1.5 mb-2">
               <Heart className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">Interested</span>
+              <span className="text-xs font-medium text-slate-700">Interested</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">{interested}</div>
-            <div className="text-xs text-blue-700 mt-1">
-              {total > 0 ? Math.round((interested / total) * 100) : 0}% of total
+            <div className="text-2xl font-semibold text-slate-900">{interested}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {total > 0 ? Math.round((interested / total) * 100) : 0}%
             </div>
           </div>
 
-          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="text-center border-l border-r border-slate-200">
+            <div className="flex items-center justify-center gap-1.5 mb-2">
               <Clock className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-900">Started</span>
+              <span className="text-xs font-medium text-slate-700">Started</span>
             </div>
-            <div className="text-2xl font-bold text-yellow-600">{started}</div>
-            <div className="text-xs text-yellow-700 mt-1">
-              {total > 0 ? Math.round((started / total) * 100) : 0}% of total
+            <div className="text-2xl font-semibold text-slate-900">{started}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {total > 0 ? Math.round((started / total) * 100) : 0}%
             </div>
           </div>
 
-          <div className="p-4 bg-green-50 rounded-lg border border-green-200 col-span-2">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1.5 mb-2">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-900">Applied</span>
+              <span className="text-xs font-medium text-slate-700">Applied</span>
             </div>
-            <div className="text-2xl font-bold text-green-600">{applied}</div>
-            <div className="text-xs text-green-700 mt-1">
-              {total > 0 ? Math.round((applied / total) * 100) : 0}% of total
+            <div className="text-2xl font-semibold text-slate-900">{applied}</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {total > 0 ? Math.round((applied / total) * 100) : 0}%
             </div>
           </div>
         </div>
 
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-slate-200">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Total Jobs Tracked</span>
-            <span className="text-lg font-semibold">{total}</span>
+            <span className="text-sm font-medium text-slate-700">Total Jobs Tracked</span>
+            <span className="text-xl font-semibold text-slate-900">{total}</span>
           </div>
         </div>
       </CardContent>

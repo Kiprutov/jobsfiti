@@ -38,50 +38,54 @@ export function AlertSection({ alerts }: AlertSectionProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="bg-white border-slate-200 shadow-none md:shadow-sm rounded-md border">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900">
           <AlertCircle className="h-5 w-5 text-orange-600" />
           Deadline Alerts ({alerts.length})
         </CardTitle>
-        <CardDescription>
-          These jobs have deadlines within 3 days and you haven't applied yet
+        <CardDescription className="text-sm text-slate-600">
+          Jobs with deadlines within 3 days that you haven't applied to yet
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {alerts.map((alert) => (
-            <Alert
+            <div
               key={alert.interest.jobId}
-              variant={alert.daysUntilDeadline === 0 ? "destructive" : "default"}
-              className="border-orange-300 bg-orange-50"
+              className="p-4 border border-orange-200 bg-orange-50/50 rounded-lg"
             >
-              <AlertCircle className="h-4 w-4 text-orange-600" />
-              <AlertTitle className="text-orange-900">
-                {alert.job.title} - {alert.job.companyName}
-              </AlertTitle>
-              <AlertDescription className="text-orange-800">
-                <p className="mb-2">
-                  Application deadline is in{" "}
-                  <strong>
-                    {alert.daysUntilDeadline} day{alert.daysUntilDeadline !== 1 ? "s" : ""}
-                  </strong>
-                  . Current status:{" "}
-                  <strong className="capitalize">{alert.interest.status}</strong>
-                </p>
-                {alert.job.applicationDeadline && (
-                  <p className="text-sm mb-3">
-                    Deadline: {alert.job.applicationDeadline}
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-slate-900 text-sm mb-1">
+                    {alert.job.title}
+                  </h4>
+                  <p className="text-sm text-slate-700 mb-2">
+                    {alert.job.companyName}
                   </p>
-                )}
-                <Link href={`/jobs/${alert.job.jobId}`}>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    <ExternalLink className="h-3 w-3 mr-2" />
-                    View Job & Apply
-                  </Button>
-                </Link>
-              </AlertDescription>
-            </Alert>
+                  <p className="text-sm text-orange-800 mb-3">
+                    Deadline in{" "}
+                    <strong>
+                      {alert.daysUntilDeadline} day{alert.daysUntilDeadline !== 1 ? "s" : ""}
+                    </strong>
+                    {" • "}
+                    Status: <strong className="capitalize">{alert.interest.status}</strong>
+                  </p>
+                  {alert.job.applicationDeadline && (
+                    <p className="text-xs text-slate-600 mb-3">
+                      Deadline: {alert.job.applicationDeadline}
+                    </p>
+                  )}
+                  <Link href={`/jobs/${alert.job.jobId}`}>
+                    <Button variant="outline" size="sm" className="shadow-sm text-xs h-8">
+                      <ExternalLink className="h-3 w-3 mr-1.5" />
+                      View Job & Apply
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </CardContent>

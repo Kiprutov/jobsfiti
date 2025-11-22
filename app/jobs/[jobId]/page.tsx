@@ -20,9 +20,9 @@ import Link from "next/link";
 import { 
   addJobInterest, 
   getInterestByJob, 
-  updateJobInterestStatus,
-  JobInterestStatus 
+  updateJobInterestStatus
 } from "@/lib/services/portalService";
+import { JobInterestStatus } from "@/lib/types/jobInterest";
 
 // Define a type for the job data we expect from Firestore
 type JobDetails = FirestoreJob & {
@@ -294,9 +294,9 @@ export default function JobDetailsPage() {
               {/* Main Content - 2 columns */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Job Header */}
-                <div className="bg-white rounded-md shadow-sm p-6 border-l-4 border-blue-600">
+                <div className="bg-white rounded-md p-6 border-l-4 border-blue-600">
                   <div className="flex flex-col md:flex-row md:items-start gap-4 mb-4">
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-blue-50 to-blue-100 rounded-md flex-shrink-0 overflow-hidden shadow-sm">
+                    <div className="relative w-24 h-24 bg-gradient-to-br from-blue-50 to-blue-100 rounded-md flex-shrink-0 overflow-hidden">
                       <Image
                         src={job.logo || "/placeholder.svg"}
                         alt={job.title}
@@ -354,7 +354,7 @@ export default function JobDetailsPage() {
 
                 {/* Important Info - Deadline */}
                 {job.applicationDeadline && (
-                  <div className="bg-white rounded-md shadow-sm p-6 border-l-4 border-red-600">
+                  <div className="bg-white rounded-md p-6 border-l-4 border-red-600">
                     <div className="flex items-center mb-2">
                       <Calendar
                         size={24}
@@ -371,7 +371,7 @@ export default function JobDetailsPage() {
                 )}
 
                 {/* Job Description */}
-                <div className="bg-white rounded-md shadow-sm p-6">
+                <div className="bg-white rounded-md p-6">
                   <h2 className="text-xl font-bold mb-4 text-gray-900">
                     Job Description
                   </h2>
@@ -390,7 +390,7 @@ export default function JobDetailsPage() {
                 {/* Requirements & Responsibilities */}
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Requirements */}
-                  <div className="bg-white rounded-md shadow-sm p-6">
+                  <div className="bg-white rounded-md p-6">
                     <h3 className="text-lg font-semibold mb-4 text-gray-900">
                       Requirements
                     </h3>
@@ -411,7 +411,7 @@ export default function JobDetailsPage() {
                   </div>
 
                   {/* Benefits */}
-                  <div className="bg-white rounded-md shadow-sm p-6">
+                  <div className="bg-white rounded-md p-6">
                     <h3 className="text-lg font-semibold mb-4 text-gray-900">
                       Benefits
                     </h3>
@@ -431,7 +431,7 @@ export default function JobDetailsPage() {
                 </div>
 
                 {/* Application Process */}
-                <div className="bg-white rounded-md shadow-sm p-6">
+                <div className="bg-white rounded-md p-6">
                   <h2 className="text-xl font-bold mb-4 text-gray-900">
                     How to Apply
                   </h2>
@@ -535,7 +535,7 @@ export default function JobDetailsPage() {
               {/* Sidebar */}
               <div className="space-y-6">
                 {/* Company Info */}
-                <div className="bg-white rounded-md shadow-sm p-6">
+                <div className="bg-white rounded-md p-6">
                   <h3 className="text-lg font-semibold mb-4 text-gray-900">
                     Company
                   </h3>
@@ -573,7 +573,7 @@ export default function JobDetailsPage() {
                 </div>
 
                 {/* Job Overview */}
-                <div className="bg-white rounded-md shadow-sm p-6">
+                <div className="bg-white rounded-md p-6">
                   <h3 className="text-lg font-semibold mb-4 text-gray-900">
                     Job Overview
                   </h3>
@@ -626,7 +626,7 @@ export default function JobDetailsPage() {
                 </div>
 
                 {/* Share Job */}
-                <div className="bg-white rounded-md shadow-sm p-6">
+                <div className="bg-white rounded-md p-6">
                   <h3 className="text-lg font-semibold mb-4 text-gray-900">
                     Share This Job
                   </h3>
@@ -716,7 +716,7 @@ export default function JobDetailsPage() {
                 ].map((job) => (
                   <div
                     key={job.id}
-                    className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                    className="bg-white rounded-lg p-6 border border-gray-100 hover:border-blue-300 transition-all duration-200"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">

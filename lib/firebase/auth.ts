@@ -1,5 +1,5 @@
-import { 
-  getAuth, 
+import {
+  getAuth,
   Auth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -10,6 +10,7 @@ import {
   sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
+export type { User };
 import app from './config';
 
 // Initialize Firebase Auth

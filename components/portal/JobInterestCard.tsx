@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/select"
 import { FirestoreJob } from "@/lib/services/jobsService"
 import { JobInterest, JobInterestStatus } from "@/lib/types/jobInterest"
-import { 
-  updateJobInterestStatus, 
+import {
+  updateJobInterestStatus,
   deleteJobInterest,
-  addCommentToInterest 
+  addCommentToInterest
 } from "@/lib/services/portalService"
 import { useAuth } from "@/lib/contexts/AuthContext"
-import { AlertCircle, ExternalLink, Trash2, MessageSquare, Clock } from "lucide-react"
+import { AlertCircle, ExternalLink, Trash2, MessageSquare, Clock, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { differenceInDays, parseISO, isAfter, format } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
@@ -39,7 +39,8 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
   const [isAddingComment, setIsAddingComment] = useState(false)
   const [commentText, setCommentText] = useState("")
   const [showCommentForm, setShowCommentForm] = useState(false)
-  
+  const [isExpanded, setIsExpanded] = useState(false)
+
   if (!job || !user) {
     return (
       <Card className="border-red-200 bg-red-50">
@@ -54,7 +55,7 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
 
   const handleStatusChange = async (newStatus: JobInterestStatus, comment?: string) => {
     if (!user) return
-    
+
     setIsUpdating(true)
     try {
       await updateJobInterestStatus(user.uid, interest.jobId, newStatus, comment)
@@ -77,7 +78,7 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
 
   const handleAddComment = async () => {
     if (!user || !commentText.trim()) return
-    
+
     setIsAddingComment(true)
     try {
       await addCommentToInterest(user.uid, interest.jobId, commentText.trim())
@@ -102,7 +103,7 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
 
   const handleRemove = async () => {
     if (!user) return
-    
+
     if (confirm("Are you sure you want to remove this job from your interests?")) {
       try {
         await deleteJobInterest(user.uid, interest.jobId)
@@ -165,175 +166,195 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
   }
 
   return (
-    <Card className={`transition-all hover:shadow-md ${isDeadlineApproaching ? "border-orange-300 bg-orange-50/30" : ""}`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg mb-2">{job.title}</CardTitle>
-            <div className="flex flex-wrap gap-2 items-center">
-              <Badge className={statusColors[interest.status]}>
-                {interest.status.charAt(0).toUpperCase() + interest.status.slice(1)}
-              </Badge>
-              <span className="text-sm text-gray-600">{job.companyName}</span>
+    <Card className={`transition-all hover:shadow-sm border-slate-200 shadow-sm ${isDeadlineApproaching ? "border-orange-300 bg-orange-50/40" : "bg-white"}`}>
+      {/* Compact View - Always Visible */}
+      <div
+        className="p-4 cursor-pointer flex items-center justify-between gap-4"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-slate-900 text-sm truncate">{job.title}</h3>
+              <p className="text-sm text-slate-600 truncate">{job.companyName}</p>
               {job.location && (
-                <span className="text-sm text-gray-500">• {job.location}</span>
+                <p className="text-xs text-slate-500 truncate mt-0.5">{job.location}</p>
               )}
             </div>
           </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Badge className={`${statusColors[interest.status]} text-xs whitespace-nowrap`}>
+            {interest.status.charAt(0).toUpperCase() + interest.status.slice(1)}
+          </Badge>
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleRemove}
-            className="text-gray-400 hover:text-red-600"
-            aria-label="Remove interest"
+            className="h-8 w-8 flex-shrink-0"
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsExpanded(!isExpanded)
+            }}
           >
-            <Trash2 className="h-4 w-4" />
+            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isDeadlineApproaching && daysUntilDeadline !== null && (
-          <div className="flex items-center gap-2 p-3 bg-orange-100 border border-orange-300 rounded-md">
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-            <p className="text-sm text-orange-800">
-              <strong>Deadline approaching!</strong> Application deadline is in {daysUntilDeadline} day{daysUntilDeadline !== 1 ? "s" : ""}.
-            </p>
-          </div>
-        )}
+      </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Application Status
-            </label>
-            <Select
-              value={interest.status}
-              onValueChange={(value) => handleStatusChange(value as JobInterestStatus)}
-              disabled={isUpdating}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="interested">Interested</SelectItem>
-                <SelectItem value="started">Started Application</SelectItem>
-                <SelectItem value="applied">Applied</SelectItem>
-                <SelectItem value="interviewed">Interviewed</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="accepted">Accepted</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {deadline && (
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">Deadline:</span> {deadline}
-          </div>
-        )}
-
-        {/* Comments Section */}
-        {interest.notes && interest.notes.length > 0 && (
-          <div className="space-y-2 pt-2 border-t">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <MessageSquare className="h-4 w-4" />
-              Notes ({interest.notes.length})
+      {/* Expanded View - Collapsible */}
+      {isExpanded && (
+        <div className="px-4 pb-4 pt-2 border-t border-slate-200 space-y-4" onClick={(e) => e.stopPropagation()}>
+          {isDeadlineApproaching && daysUntilDeadline !== null && (
+            <div className="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-orange-600 flex-shrink-0" />
+              <p className="text-sm text-orange-900">
+                <strong>Deadline approaching!</strong> Application deadline is in {daysUntilDeadline} day{daysUntilDeadline !== 1 ? "s" : ""}.
+              </p>
             </div>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {interest.notes.map((note) => (
-                <div key={note.id} className="text-sm bg-gray-50 p-2 rounded border border-gray-200">
-                  <p className="text-gray-800">{note.text}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formatTimestamp(note.timestamp)}
-                    {note.status && ` • Status: ${note.status}`}
-                  </p>
-                </div>
-              ))}
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <label className="text-sm font-medium text-slate-700 mb-2 block">
+                Application Status
+              </label>
+              <Select
+                value={interest.status}
+                onValueChange={(value) => handleStatusChange(value as JobInterestStatus)}
+                disabled={isUpdating}
+              >
+                <SelectTrigger className="w-full border-slate-300">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="interested">Interested</SelectItem>
+                  <SelectItem value="started">Started Application</SelectItem>
+                  <SelectItem value="applied">Applied</SelectItem>
+                  <SelectItem value="interviewed">Interviewed</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        )}
 
-        {/* Add Comment */}
-        <div className="pt-2 border-t">
-          {!showCommentForm ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCommentForm(true)}
-              className="w-full"
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Add Note/Comment
-            </Button>
-          ) : (
-            <div className="space-y-2">
-              <Textarea
-                placeholder="Add a note or comment about this application..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                rows={3}
-                disabled={isAddingComment}
-              />
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={handleAddComment}
-                  disabled={isAddingComment || !commentText.trim()}
-                  className="flex-1"
-                >
-                  {isAddingComment ? "Adding..." : "Save Note"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setShowCommentForm(false)
-                    setCommentText("")
-                  }}
-                  disabled={isAddingComment}
-                >
-                  Cancel
-                </Button>
+          {deadline && (
+            <div className="text-sm text-slate-600">
+              <span className="font-medium text-slate-700">Deadline:</span> {deadline}
+            </div>
+          )}
+
+          {/* Comments Section */}
+          {interest.notes && interest.notes.length > 0 && (
+            <div className="space-y-2 pt-2 border-t">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <MessageSquare className="h-4 w-4" />
+                Notes ({interest.notes.length})
+              </div>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {interest.notes.map((note) => (
+                  <div key={note.id} className="text-sm bg-gray-50 p-2 rounded border border-gray-200">
+                    <p className="text-gray-800">{note.text}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatTimestamp(note.timestamp)}
+                      {note.status && ` • Status: ${note.status}`}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
-        </div>
 
-        {/* Status History */}
-        {interest.statusHistory && interest.statusHistory.length > 1 && (
+          {/* Add Comment */}
           <div className="pt-2 border-t">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-              <Clock className="h-4 w-4" />
-              Status History
-            </div>
-            <div className="space-y-1 text-xs">
-              {interest.statusHistory.slice(-3).reverse().map((entry, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-gray-600">
-                  <div className="flex-1">
-                    <span className="font-medium capitalize">{entry.status}</span>
-                    {entry.comment && (
-                      <span className="text-gray-500 ml-2">- {entry.comment}</span>
-                    )}
-                    <div className="text-gray-400 text-xs mt-0.5">
-                      {formatTimestamp(entry.timestamp)}
+            {!showCommentForm ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCommentForm(true)}
+                className="w-full"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Add Note/Comment
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Add a note or comment about this application..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  rows={3}
+                  disabled={isAddingComment}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleAddComment}
+                    disabled={isAddingComment || !commentText.trim()}
+                    className="flex-1"
+                  >
+                    {isAddingComment ? "Adding..." : "Save Note"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowCommentForm(false)
+                      setCommentText("")
+                    }}
+                    disabled={isAddingComment}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Status History */}
+          {interest.statusHistory && interest.statusHistory.length > 1 && (
+            <div className="pt-2 border-t">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                <Clock className="h-4 w-4" />
+                Status History
+              </div>
+              <div className="space-y-1 text-xs">
+                {interest.statusHistory.slice(-3).reverse().map((entry, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-gray-600">
+                    <div className="flex-1">
+                      <span className="font-medium capitalize">{entry.status}</span>
+                      {entry.comment && (
+                        <span className="text-gray-500 ml-2">- {entry.comment}</span>
+                      )}
+                      <div className="text-gray-400 text-xs mt-0.5">
+                        {formatTimestamp(entry.timestamp)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="flex gap-2 pt-2">
-          <Link href={`/jobs/${job.jobId}`} className="flex-1">
-            <Button variant="outline" className="w-full" size="sm">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              View Job Details
+          <div className="flex gap-2 pt-2">
+            <Link href={`/jobs/${job.jobId}`} className="flex-1">
+              <Button variant="outline" className="w-full" size="sm">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Job Details
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRemove}
+              className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
-          </Link>
+          </div>
         </div>
-      </CardContent>
+      )}
     </Card>
   )
 }
-
