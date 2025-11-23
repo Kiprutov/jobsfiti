@@ -63,7 +63,7 @@ export function CoverageRateCard({
           Percentage of interested jobs you've applied to
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6 border-t border-slate-200">
         <div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-slate-700">

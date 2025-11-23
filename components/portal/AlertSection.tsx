@@ -19,14 +19,14 @@ interface AlertSectionProps {
 export function AlertSection({ alerts }: AlertSectionProps) {
   if (alerts.length === 0) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="bg-white border-slate-200 shadow-none md:shadow-sm rounded-md border">
+        <CardHeader className="pb-4">
           <CardTitle>Deadline Alerts</CardTitle>
           <CardDescription>
             Jobs with approaching deadlines that you haven't applied to yet
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6 border-t border-slate-200">
           <div className="text-center py-8 text-gray-500">
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
             <p>No deadline alerts at the moment.</p>
@@ -48,7 +48,7 @@ export function AlertSection({ alerts }: AlertSectionProps) {
           Jobs with deadlines within 3 days that you haven't applied to yet
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6 border-t border-slate-200">
         <div className="space-y-3">
           {alerts.map((alert) => (
             <div

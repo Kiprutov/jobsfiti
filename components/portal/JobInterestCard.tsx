@@ -41,6 +41,9 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
   const [showCommentForm, setShowCommentForm] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   if (!job || !user) {
     return (
       <Card className="border-red-200 bg-red-50">
@@ -61,7 +64,7 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
       await updateJobInterestStatus(user.uid, interest.jobId, newStatus, comment)
       toast({
         title: "Status updated",
-        description: `Job status changed to ${newStatus}`,
+        description: `Job status changed to ${newStatus.replace(/_/g, ' ')}`,
       })
       onUpdate()
     } catch (error: any) {
@@ -104,22 +107,24 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
   const handleRemove = async () => {
     if (!user) return
 
-    if (confirm("Are you sure you want to remove this job from your interests?")) {
-      try {
-        await deleteJobInterest(user.uid, interest.jobId)
-        toast({
-          title: "Removed",
-          description: "Job has been removed from your interests",
-        })
-        onUpdate()
-      } catch (error: any) {
-        console.error("Error removing interest:", error)
-        toast({
-          title: "Error",
-          description: error.message || "Failed to remove",
-          variant: "destructive",
-        })
-      }
+    setIsDeleting(true)
+    try {
+      await deleteJobInterest(user.uid, interest.jobId)
+      toast({
+        title: "Removed",
+        description: "Job has been removed from your interests",
+      })
+      onUpdate()
+    } catch (error: any) {
+      console.error("Error removing interest:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 
@@ -145,6 +150,11 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
     interested: "bg-blue-100 text-blue-800",
     started: "bg-yellow-100 text-yellow-800",
     applied: "bg-green-100 text-green-800",
+    phone_screen: "bg-purple-100 text-purple-800",
+    technical_interview: "bg-purple-100 text-purple-800",
+    onsite_interview: "bg-purple-100 text-purple-800",
+    final_interview: "bg-purple-100 text-purple-800",
+    offer_stage: "bg-emerald-50 text-emerald-700 border-emerald-200",
     interviewed: "bg-purple-100 text-purple-800",
     rejected: "bg-red-100 text-red-800",
     accepted: "bg-emerald-100 text-emerald-800",
@@ -165,120 +175,152 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
     }
   }
 
+  const formatStatusLabel = (status: string) => {
+    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+  }
+
   return (
-    <Card className={`transition-all hover:shadow-sm border-slate-200 shadow-sm ${isDeadlineApproaching ? "border-orange-300 bg-orange-50/40" : "bg-white"}`}>
-      {/* Compact View - Always Visible */}
-      <div
-        className="p-4 cursor-pointer flex items-center justify-between gap-4"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start gap-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-slate-900 text-sm truncate">{job.title}</h3>
-              <p className="text-sm text-slate-600 truncate">{job.companyName}</p>
-              {job.location && (
-                <p className="text-xs text-slate-500 truncate mt-0.5">{job.location}</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Badge className={`${statusColors[interest.status]} text-xs whitespace-nowrap`}>
-            {interest.status.charAt(0).toUpperCase() + interest.status.slice(1)}
-          </Badge>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 flex-shrink-0"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(!isExpanded)
-            }}
-          >
-            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-          </Button>
-        </div>
-      </div>
-
-      {/* Expanded View - Collapsible */}
-      {isExpanded && (
-        <div className="px-4 pb-4 pt-2 border-t border-slate-200 space-y-4" onClick={(e) => e.stopPropagation()}>
-          {isDeadlineApproaching && daysUntilDeadline !== null && (
-            <div className="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-orange-600 flex-shrink-0" />
-              <p className="text-sm text-orange-900">
-                <strong>Deadline approaching!</strong> Application deadline is in {daysUntilDeadline} day{daysUntilDeadline !== 1 ? "s" : ""}.
-              </p>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <label className="text-sm font-medium text-slate-700 mb-2 block">
-                Application Status
-              </label>
-              <Select
-                value={interest.status}
-                onValueChange={(value) => handleStatusChange(value as JobInterestStatus)}
-                disabled={isUpdating}
-              >
-                <SelectTrigger className="w-full border-slate-300">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="interested">Interested</SelectItem>
-                  <SelectItem value="started">Started Application</SelectItem>
-                  <SelectItem value="applied">Applied</SelectItem>
-                  <SelectItem value="interviewed">Interviewed</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                </SelectContent>
-              </Select>
+    <>
+      <Card className={`transition-all hover:shadow-sm border-slate-200 shadow-sm ${isDeadlineApproaching ? "border-orange-300 bg-orange-50/40" : "bg-white"}`}>
+        {/* Compact View - Always Visible */}
+        <div
+          className="p-4 cursor-pointer flex items-center justify-between gap-4"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-slate-900 text-sm truncate">{job.title}</h3>
+                <p className="text-sm text-slate-600 truncate">{job.companyName}</p>
+                {job.location && (
+                  <p className="text-xs text-slate-500 truncate mt-0.5">{job.location}</p>
+                )}
+              </div>
             </div>
           </div>
 
-          {deadline && (
-            <div className="text-sm text-slate-600">
-              <span className="font-medium text-slate-700">Deadline:</span> {deadline}
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            <Badge className={`${statusColors[interest.status]} text-xs whitespace-nowrap`}>
+              {formatStatusLabel(interest.status)}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsExpanded(!isExpanded)
+              }}
+            >
+              <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+            </Button>
+          </div>
+        </div>
 
-          {/* Comments Section */}
-          {interest.notes && interest.notes.length > 0 && (
-            <div className="space-y-2 pt-2 border-t">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                <MessageSquare className="h-4 w-4" />
-                Notes ({interest.notes.length})
+        {/* Expanded View - Collapsible */}
+        {isExpanded && (
+          <div className="px-4 pb-4 pt-2 border-t border-slate-200 space-y-4" onClick={(e) => e.stopPropagation()}>
+            {isDeadlineApproaching && daysUntilDeadline !== null && (
+              <div className="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <AlertCircle className="h-4 w-4 text-orange-600 flex-shrink-0" />
+                <p className="text-sm text-orange-900">
+                  <strong>Deadline approaching!</strong> Application deadline is in {daysUntilDeadline} day{daysUntilDeadline !== 1 ? "s" : ""}.
+                </p>
               </div>
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {interest.notes.map((note) => (
-                  <div key={note.id} className="text-sm bg-gray-50 p-2 rounded border border-gray-200">
-                    <p className="text-gray-800">{note.text}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formatTimestamp(note.timestamp)}
-                      {note.status && ` • Status: ${note.status}`}
-                    </p>
-                  </div>
-                ))}
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-2 block">
+                  Application Status
+                </label>
+                <Select
+                  value={interest.status}
+                  onValueChange={(value) => handleStatusChange(value as JobInterestStatus)}
+                  disabled={isUpdating}
+                >
+                  <SelectTrigger className="border-slate-300">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="interested">Interested</SelectItem>
+                    <SelectItem value="started">Started Application</SelectItem>
+                    <SelectItem value="applied">Applied</SelectItem>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">Interview Stages</div>
+                    <SelectItem value="phone_screen">Phone Screen</SelectItem>
+                    <SelectItem value="technical_interview">Technical Interview</SelectItem>
+                    <SelectItem value="onsite_interview">On-site Interview</SelectItem>
+                    <SelectItem value="final_interview">Final Interview</SelectItem>
+                    <SelectItem value="offer_stage">Offer Received</SelectItem>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-slate-500">Outcome</div>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-end">
+                <Link href={`/jobs/${job.jobId}`} className="w-full">
+                  <Button variant="outline" className="w-full" size="sm">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Job Details
+                  </Button>
+                </Link>
               </div>
             </div>
-          )}
 
-          {/* Add Comment */}
-          <div className="pt-2 border-t">
-            {!showCommentForm ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCommentForm(true)}
-                className="w-full"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Add Note/Comment
-              </Button>
-            ) : (
+            {deadline && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-sm text-slate-600">
+                  <span className="font-medium text-slate-700">Deadline:</span> {deadline}
+                </div>
+                <div className="flex items-center gap-2">
+                  {!showCommentForm && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCommentForm(true)}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Add Note / Comment
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="text-slate-600 hover:text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Comments Section */}
+            {interest.notes && interest.notes.length > 0 && (
+              <div className="space-y-2 pt-2 border-t">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <MessageSquare className="h-4 w-4" />
+                  Notes ({interest.notes.length})
+                </div>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {interest.notes.map((note) => (
+                    <div key={note.id} className="text-sm bg-gray-50 p-2 rounded border border-gray-200">
+                      <p className="text-gray-800">{note.text}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatTimestamp(note.timestamp)}
+                        {note.status && ` • Status: ${formatStatusLabel(note.status)}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add Comment Form */}
+            {showCommentForm && (
               <div className="space-y-2">
                 <Textarea
                   placeholder="Add a note or comment about this application..."
@@ -310,51 +352,63 @@ export function JobInterestCard({ interest, job, onUpdate }: JobInterestCardProp
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Status History */}
-          {interest.statusHistory && interest.statusHistory.length > 1 && (
-            <div className="pt-2 border-t">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-                <Clock className="h-4 w-4" />
-                Status History
-              </div>
-              <div className="space-y-1 text-xs">
-                {interest.statusHistory.slice(-3).reverse().map((entry, idx) => (
-                  <div key={idx} className="flex items-start gap-2 text-gray-600">
-                    <div className="flex-1">
-                      <span className="font-medium capitalize">{entry.status}</span>
-                      {entry.comment && (
-                        <span className="text-gray-500 ml-2">- {entry.comment}</span>
-                      )}
-                      <div className="text-gray-400 text-xs mt-0.5">
-                        {formatTimestamp(entry.timestamp)}
+            {/* Status History */}
+            {interest.statusHistory && interest.statusHistory.length > 1 && (
+              <div className="pt-2 border-t">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                  <Clock className="h-4 w-4" />
+                  Status History
+                </div>
+                <div className="space-y-1 text-xs">
+                  {interest.statusHistory.slice(-3).reverse().map((entry, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-gray-600">
+                      <div className="flex-1">
+                        <span className="font-medium capitalize">{formatStatusLabel(entry.status)}</span>
+                        {entry.comment && (
+                          <span className="text-gray-500 ml-2">- {entry.comment}</span>
+                        )}
+                        <div className="text-gray-400 text-xs mt-0.5">
+                          {formatTimestamp(entry.timestamp)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="flex gap-2 pt-2">
-            <Link href={`/jobs/${job.jobId}`} className="flex-1">
-              <Button variant="outline" className="w-full" size="sm">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View Job Details
+          </div>
+        )}
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Remove from Interests?</h3>
+            <p className="text-slate-600 mb-6">
+              Are you sure you want to remove <strong>{job.title}</strong> from your interests? This action cannot be undone and you will lose all notes and status history.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
               </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRemove}
-              className="text-slate-400 hover:text-red-600 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              <Button
+                variant="destructive"
+                onClick={handleRemove}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Removing..." : "Remove Job"}
+              </Button>
+            </div>
           </div>
         </div>
       )}
-    </Card>
+    </>
   )
 }

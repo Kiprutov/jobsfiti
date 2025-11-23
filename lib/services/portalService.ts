@@ -1,10 +1,10 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc, 
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -34,7 +34,7 @@ export const addJobInterest = async (
 ): Promise<string> => {
   // Check if interest already exists
   const existingInterest = await getInterestByJob(userId, jobId);
-  
+
   if (existingInterest) {
     // Update existing interest
     await updateJobInterestStatus(userId, jobId, initialStatus, comment);
@@ -43,12 +43,18 @@ export const addJobInterest = async (
 
   // Create new interest
   const now = Timestamp.now();
-  const statusHistory: StatusHistoryEntry[] = [{
+  const statusHistoryEntry: any = {
     status: initialStatus,
     timestamp: now,
-    comment: comment,
     userId,
-  }];
+  };
+
+  // Only include comment if it's provided (Firestore doesn't allow undefined)
+  if (comment) {
+    statusHistoryEntry.comment = comment;
+  }
+
+  const statusHistory: StatusHistoryEntry[] = [statusHistoryEntry];
 
   // Build interest data, filtering out undefined values
   const interestData: any = {
@@ -88,7 +94,7 @@ export const updateJobInterestStatus = async (
   comment?: string
 ): Promise<void> => {
   const interest = await getInterestByJob(userId, jobId);
-  
+
   if (!interest) {
     throw new Error('Job interest not found');
   }
@@ -129,7 +135,7 @@ export const addCommentToInterest = async (
   status?: JobInterestStatus
 ): Promise<void> => {
   const interest = await getInterestByJob(userId, jobId);
-  
+
   if (!interest) {
     throw new Error('Job interest not found');
   }
@@ -158,7 +164,7 @@ export const getUserInterests = async (userId: string): Promise<JobInterest[]> =
     jobInterestsCollection,
     where('userId', '==', userId)
   );
-  
+
   const querySnapshot = await getDocs(q);
   const interests = querySnapshot.docs.map((docSnap) => {
     const data = docSnap.data();
@@ -169,17 +175,17 @@ export const getUserInterests = async (userId: string): Promise<JobInterest[]> =
       statusHistory: data.statusHistory || [],
     } as JobInterest;
   });
-  
+
   // Sort by updatedAt in memory (most recent first)
   return interests.sort((a, b) => {
-    const aTime = a.updatedAt instanceof Date 
-      ? a.updatedAt.getTime() 
-      : typeof a.updatedAt === 'string' 
+    const aTime = a.updatedAt instanceof Date
+      ? a.updatedAt.getTime()
+      : typeof a.updatedAt === 'string'
         ? new Date(a.updatedAt).getTime()
         : a.updatedAt?.toDate?.()?.getTime() || 0;
-    const bTime = b.updatedAt instanceof Date 
-      ? b.updatedAt.getTime() 
-      : typeof b.updatedAt === 'string' 
+    const bTime = b.updatedAt instanceof Date
+      ? b.updatedAt.getTime()
+      : typeof b.updatedAt === 'string'
         ? new Date(b.updatedAt).getTime()
         : b.updatedAt?.toDate?.()?.getTime() || 0;
     return bTime - aTime; // Descending order
@@ -208,22 +214,22 @@ export const subscribeToUserInterests = (
         statusHistory: data.statusHistory || [],
       } as JobInterest;
     });
-    
+
     // Sort by updatedAt in memory (most recent first)
     const sorted = interests.sort((a, b) => {
-      const aTime = a.updatedAt instanceof Date 
-        ? a.updatedAt.getTime() 
-        : typeof a.updatedAt === 'string' 
+      const aTime = a.updatedAt instanceof Date
+        ? a.updatedAt.getTime()
+        : typeof a.updatedAt === 'string'
           ? new Date(a.updatedAt).getTime()
           : a.updatedAt?.toDate?.()?.getTime() || 0;
-      const bTime = b.updatedAt instanceof Date 
-        ? b.updatedAt.getTime() 
-        : typeof b.updatedAt === 'string' 
+      const bTime = b.updatedAt instanceof Date
+        ? b.updatedAt.getTime()
+        : typeof b.updatedAt === 'string'
           ? new Date(b.updatedAt).getTime()
           : b.updatedAt?.toDate?.()?.getTime() || 0;
       return bTime - aTime; // Descending order
     });
-    
+
     callback(sorted);
   });
 };
@@ -239,9 +245,9 @@ export const getInterestByJob = async (
     where('jobId', '==', jobId),
     limit(1)
   );
-  
+
   const querySnapshot = await getDocs(q);
-  
+
   if (querySnapshot.empty) {
     return null;
   }
@@ -271,7 +277,7 @@ export const deleteJobInterest = async (
   jobId: string
 ): Promise<void> => {
   const interest = await getInterestByJob(userId, jobId);
-  
+
   if (!interest || !interest.id) {
     throw new Error('Job interest not found');
   }
@@ -291,22 +297,22 @@ export const getJobsWithApproachingDeadlines = async (
   const interests = await getUserInterests(userId);
   const now = new Date();
   const thresholdDays = 3;
-  
+
   const approaching: {
     interest: JobInterest;
     job: FirestoreJob;
     daysUntilDeadline: number;
   }[] = [];
-  
+
   for (const interest of interests) {
     // Only check jobs that are not yet applied
     if (interest.status === 'applied' || interest.status === 'accepted' || interest.status === 'rejected') {
       continue;
     }
-    
+
     // Get deadline from interest or fetch job
     let deadline: string | undefined = interest.deadline;
-    
+
     if (!deadline) {
       try {
         const job = await getJobById(interest.jobId);
@@ -318,16 +324,16 @@ export const getJobsWithApproachingDeadlines = async (
         continue;
       }
     }
-    
+
     if (!deadline) continue;
-    
+
     try {
       const deadlineDate = parseISO(deadline);
-      
+
       // Check if deadline is in the future and within threshold
       if (isAfter(deadlineDate, now)) {
         const daysUntil = differenceInDays(deadlineDate, now);
-        
+
         if (daysUntil <= thresholdDays && daysUntil >= 0) {
           try {
             const job = await getJobById(interest.jobId);
@@ -347,7 +353,7 @@ export const getJobsWithApproachingDeadlines = async (
       console.error(`Error parsing deadline ${deadline}:`, error);
     }
   }
-  
+
   return approaching.sort((a, b) => a.daysUntilDeadline - b.daysUntilDeadline);
 };
 
@@ -361,14 +367,14 @@ export const calculateCoverageRate = async (userId: string): Promise<{
 }> => {
   const interests = await getUserInterests(userId);
   const total = interests.length;
-  const applied = interests.filter(i => 
+  const applied = interests.filter(i =>
     i.status === 'applied' || i.status === 'interviewed' || i.status === 'accepted'
   ).length;
   const started = interests.filter(i => i.status === 'started').length;
   const interested = interests.filter(i => i.status === 'interested').length;
-  
+
   const coverageRate = total > 0 ? (applied / total) * 100 : 0;
-  
+
   return {
     total,
     applied,
@@ -385,7 +391,7 @@ export const getInterestsWithJobs = async (userId: string): Promise<{
 }[]> => {
   const interests = await getUserInterests(userId);
   const results: { interest: JobInterest; job: FirestoreJob | null }[] = [];
-  
+
   for (const interest of interests) {
     try {
       const job = await getJobById(interest.jobId);
@@ -395,7 +401,7 @@ export const getInterestsWithJobs = async (userId: string): Promise<{
       results.push({ interest, job: null });
     }
   }
-  
+
   return results;
 };
 
@@ -406,7 +412,7 @@ export const updateInterestPriority = async (
   priority: 'low' | 'medium' | 'high'
 ): Promise<void> => {
   const interest = await getInterestByJob(userId, jobId);
-  
+
   if (!interest || !interest.id) {
     throw new Error('Job interest not found');
   }
@@ -425,7 +431,7 @@ export const updateInterestTags = async (
   tags: string[]
 ): Promise<void> => {
   const interest = await getInterestByJob(userId, jobId);
-  
+
   if (!interest || !interest.id) {
     throw new Error('Job interest not found');
   }

@@ -1,11 +1,16 @@
 import { Timestamp } from 'firebase/firestore';
 
-export type JobInterestStatus = 
-  | "interested" 
-  | "started" 
-  | "applied" 
-  | "interviewed" 
-  | "rejected" 
+export type JobInterestStatus =
+  | "interested"
+  | "started"
+  | "applied"
+  | "phone_screen"
+  | "technical_interview"
+  | "onsite_interview"
+  | "final_interview"
+  | "offer_stage"
+  | "interviewed"
+  | "rejected"
   | "accepted";
 
 export type Priority = "low" | "medium" | "high";

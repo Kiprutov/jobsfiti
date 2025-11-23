@@ -20,209 +20,7 @@ import { useRouter } from "next/navigation"
 import { Briefcase, AlertCircle, TrendingUp, Sparkles, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
-// Sample data for visualization
-const SAMPLE_DATA = {
-  interestsWithJobs: [
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job1",
-        status: "interested" as const,
-        createdAt: new Date("2025-11-20"),
-        updatedAt: new Date("2025-11-22"),
-        notes: [
-          { id: "1", text: "Great company culture, flexible work hours", timestamp: new Date("2025-11-20"), status: "interested" }
-        ],
-        statusHistory: [
-          { status: "interested" as const, timestamp: new Date("2025-11-20"), comment: "Found through LinkedIn" }
-        ]
-      },
-      job: {
-        jobId: "job1",
-        title: "Senior Frontend Developer",
-        companyName: "TechCorp Solutions",
-        location: "Nairobi, Kenya (Remote)",
-        applicationDeadline: "2025-11-30",
-        role: "senior" as const,
-        type: "full-time" as const
-      }
-    },
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job2",
-        status: "started" as const,
-        createdAt: new Date("2025-11-18"),
-        updatedAt: new Date("2025-11-21"),
-        notes: [
-          { id: "2", text: "Completed resume update, need to write cover letter", timestamp: new Date("2025-11-21"), status: "started" },
-          { id: "3", text: "Research shows good growth opportunities", timestamp: new Date("2025-11-18"), status: "interested" }
-        ],
-        statusHistory: [
-          { status: "interested" as const, timestamp: new Date("2025-11-18") },
-          { status: "started" as const, timestamp: new Date("2025-11-21"), comment: "Started application process" }
-        ]
-      },
-      job: {
-        jobId: "job2",
-        title: "Full Stack Engineer",
-        companyName: "InnovateLabs Kenya",
-        location: "Mombasa, Kenya (Hybrid)",
-        applicationDeadline: "2025-11-25",
-        role: "mid-level" as const,
-        type: "full-time" as const
-      }
-    },
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job3",
-        status: "applied" as const,
-        createdAt: new Date("2025-11-15"),
-        updatedAt: new Date("2025-11-19"),
-        notes: [
-          { id: "4", text: "Submitted application with portfolio link", timestamp: new Date("2025-11-19"), status: "applied" },
-          { id: "5", text: "Tailored resume for mobile development focus", timestamp: new Date("2025-11-17"), status: "started" }
-        ],
-        statusHistory: [
-          { status: "interested" as const, timestamp: new Date("2025-11-15") },
-          { status: "started" as const, timestamp: new Date("2025-11-17") },
-          { status: "applied" as const, timestamp: new Date("2025-11-19"), comment: "Application submitted" }
-        ]
-      },
-      job: {
-        jobId: "job3",
-        title: "Mobile Application Developer",
-        companyName: "Safaricom PLC",
-        location: "Nairobi, Kenya",
-        applicationDeadline: "2025-11-22",
-        role: "junior" as const,
-        type: "full-time" as const
-      }
-    },
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job4",
-        status: "interviewed" as const,
-        createdAt: new Date("2025-11-10"),
-        updatedAt: new Date("2025-11-21"),
-        notes: [
-          { id: "6", text: "Second round interview scheduled for Nov 28", timestamp: new Date("2025-11-21"), status: "interviewed" },
-          { id: "7", text: "First interview went well, discussed tech stack", timestamp: new Date("2025-11-18"), status: "interviewed" }
-        ],
-        statusHistory: [
-          { status: "interested" as const, timestamp: new Date("2025-11-10") },
-          { status: "started" as const, timestamp: new Date("2025-11-12") },
-          { status: "applied" as const, timestamp: new Date("2025-11-14") },
-          { status: "interviewed" as const, timestamp: new Date("2025-11-18"), comment: "Completed first round" }
-        ]
-      },
-      job: {
-        jobId: "job4",
-        title: "Backend Engineer - Node.js",
-        companyName: "Equity Bank",
-        location: "Nairobi, Kenya",
-        role: "mid-level" as const,
-        type: "full-time" as const
-      }
-    },
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job5",
-        status: "interested" as const,
-        createdAt: new Date("2025-11-22"),
-        updatedAt: new Date("2025-11-22"),
-        notes: [],
-        statusHistory: [
-          { status: "interested" as const, timestamp: new Date("2025-11-22") }
-        ]
-      },
-      job: {
-        jobId: "job5",
-        title: "DevOps Engineer",
-        companyName: "M-PESA Africa",
-        location: "Nairobi, Kenya (Remote)",
-        applicationDeadline: "2025-12-05",
-        role: "senior" as const,
-        type: "contract" as const
-      }
-    },
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job6",
-        status: "started" as const,
-        createdAt: new Date("2025-11-21"),
-        updatedAt: new Date("2025-11-22"),
-        notes: [
-          { id: "8", text: "Started filling out online application form", timestamp: new Date("2025-11-22"), status: "started" }
-        ],
-        statusHistory: [
-          { status: "interested" as const, timestamp: new Date("2025-11-21") },
-          { status: "started" as const, timestamp: new Date("2025-11-22") }
-        ]
-      },
-      job: {
-        jobId: "job6",
-        title: "React Native Developer",
-        companyName: "Twiga Foods",
-        location: "Nairobi, Kenya",
-        applicationDeadline: "2025-11-24",
-        role: "junior" as const,
-        type: "full-time" as const
-      }
-    }
-  ],
-  alerts: [
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job2",
-        status: "started" as const,
-        createdAt: new Date("2025-11-18"),
-        updatedAt: new Date("2025-11-21")
-      },
-      job: {
-        jobId: "job2",
-        title: "Full Stack Engineer",
-        companyName: "InnovateLabs Kenya",
-        location: "Mombasa, Kenya (Hybrid)",
-        applicationDeadline: "2025-11-25",
-        role: "mid-level" as const,
-        type: "full-time" as const
-      },
-      daysUntilDeadline: 3
-    },
-    {
-      interest: {
-        userId: "sample",
-        jobId: "job6",
-        status: "started" as const,
-        createdAt: new Date("2025-11-21"),
-        updatedAt: new Date("2025-11-22")
-      },
-      job: {
-        jobId: "job6",
-        title: "React Native Developer",
-        companyName: "Twiga Foods",
-        location: "Nairobi, Kenya",
-        applicationDeadline: "2025-11-24",
-        role: "junior" as const,
-        type: "full-time" as const
-      },
-      daysUntilDeadline: 2
-    }
-  ],
-  coverageRate: {
-    total: 6,
-    applied: 2,
-    started: 2,
-    interested: 2,
-    coverageRate: 67
-  }
-}
+
 
 
 export default function PortalPage() {
@@ -259,13 +57,16 @@ export default function PortalPage() {
     try {
       setIsLoading(true)
 
-      // Using sample data for visualization
-      setInterestsWithJobs(SAMPLE_DATA.interestsWithJobs as any)
-      setAlerts(SAMPLE_DATA.alerts as any)
-      setCoverageRate(SAMPLE_DATA.coverageRate)
+      const [interests, approachingDeadlines, coverage] = await Promise.all([
+        getInterestsWithJobs(user.uid),
+        getJobsWithApproachingDeadlines(user.uid),
+        calculateCoverageRate(user.uid)
+      ]);
 
-      // Simulate loading delay
-      await new Promise(resolve => setTimeout(resolve, 500))
+      setInterestsWithJobs(interests)
+      setAlerts(approachingDeadlines)
+      setCoverageRate(coverage)
+
     } catch (error) {
       console.error("Error loading portal data:", error)
     } finally {
@@ -292,10 +93,9 @@ export default function PortalPage() {
     (item) => item.interest.status === "started"
   )
   const appliedJobs = interestsWithJobs.filter(
-    (item) => item.interest.status === "applied" ||
-      item.interest.status === "interviewed" ||
-      item.interest.status === "rejected" ||
-      item.interest.status === "accepted"
+    (item) => ["applied", "phone_screen", "technical_interview",
+      "onsite_interview", "final_interview", "offer_stage",
+      "interviewed", "rejected", "accepted"].includes(item.interest.status)
   )
 
   // Show loading while checking auth or loading data

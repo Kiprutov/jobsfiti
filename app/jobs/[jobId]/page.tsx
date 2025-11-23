@@ -17,26 +17,27 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { 
-  addJobInterest, 
-  getInterestByJob, 
+import {
+  addJobInterest,
+  getInterestByJob,
   updateJobInterestStatus
 } from "@/lib/services/portalService";
 import { JobInterestStatus } from "@/lib/types/jobInterest";
+import { useToast } from "@/hooks/use-toast";
 
 // Define a type for the job data we expect from Firestore
 type JobDetails = FirestoreJob & {
   jobType?: string;
   isSponsored?: boolean;
   salaryRange?:
-    | string
-    | {
-        min: number;
-        max: number;
-        currency: string;
-        period: string;
-        isEstimate: boolean;
-      };
+  | string
+  | {
+    min: number;
+    max: number;
+    currency: string;
+    period: string;
+    isEstimate: boolean;
+  };
   requirements?: {
     education?: Array<{ degree: string; fieldOfStudy: string }>;
     experience?: {
@@ -85,6 +86,7 @@ export default function JobDetailsPage() {
   const [currentInterest, setCurrentInterest] = useState<{ status: JobInterestStatus } | null>(null);
   const [isAddingToPortal, setIsAddingToPortal] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
   const jobId = params?.jobId ? String(params.jobId) : "";
 
   // Fetch job details
@@ -105,7 +107,7 @@ export default function JobDetailsPage() {
           return;
         }
         setJob(jobData as JobDetails);
-        
+
         // Check if job is already in portal (only if user is authenticated)
         if (user) {
           try {
@@ -240,9 +242,9 @@ export default function JobDetailsPage() {
     ...(job.requirements?.softSkills || []),
     ...((job as any).requirementsText
       ? String((job as any).requirementsText)
-          .split(/\r?\n/) 
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0)
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
       : []),
   ];
 
@@ -437,7 +439,7 @@ export default function JobDetailsPage() {
                   </h2>
                   <div className="space-y-4">
                     {Array.isArray(job.applicationProcess) &&
-                    job.applicationProcess.length > 0 ? (
+                      job.applicationProcess.length > 0 ? (
                       <ol className="list-decimal ml-5 space-y-1 text-gray-700">
                         {job.applicationProcess.map(
                           (step: string, idx: number) => (
@@ -471,7 +473,11 @@ export default function JobDetailsPage() {
                         </a>
                         <button
                           onClick={async () => {
-                            if (!job || !user) return;
+                            if (!user) {
+                              router.push(`/auth?redirect=/jobs/${jobId}`);
+                              return;
+                            }
+
                             setIsAddingToPortal(true);
                             try {
                               if (currentInterest) {
@@ -486,22 +492,25 @@ export default function JobDetailsPage() {
                               setIsAddingToPortal(false);
                             }
                           }}
-                          disabled={isAddingToPortal || !user}
-                          className={`inline-flex items-center gap-2 px-4 py-3 rounded-md transition-colors duration-200 ${
-                            currentInterest
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                          disabled={isAddingToPortal}
+                          className={`inline-flex items-center gap-2 px-4 py-3 rounded-md transition-colors duration-200 ${currentInterest
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
                         >
                           <BookmarkPlus className="h-4 w-4" />
-                          {currentInterest ? 'In Portal' : user ? 'Add to Portal' : 'Sign in to bookmark'}
+                          {currentInterest ? 'In Portal' : 'Save Job'}
                         </button>
                       </div>
                     ) : (
                       <div className="pt-2">
                         <button
                           onClick={async () => {
-                            if (!job || !user) return;
+                            if (!user) {
+                              router.push(`/auth?redirect=/jobs/${jobId}`);
+                              return;
+                            }
+
                             setIsAddingToPortal(true);
                             try {
                               if (currentInterest) {
@@ -509,6 +518,10 @@ export default function JobDetailsPage() {
                               } else {
                                 await addJobInterest(user.uid, jobId, 'interested', undefined, job.applicationDeadline);
                                 setCurrentInterest({ status: 'interested' });
+                                toast({
+                                  title: "Job Saved",
+                                  description: "This job has been added to your portal.",
+                                })
                               }
                             } catch (error) {
                               console.error('Error adding to portal:', error);
@@ -516,15 +529,18 @@ export default function JobDetailsPage() {
                               setIsAddingToPortal(false);
                             }
                           }}
-                          disabled={isAddingToPortal || !user}
-                          className={`inline-flex items-center gap-2 px-4 py-3 rounded-md transition-colors duration-200 ${
-                            currentInterest
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
+                          disabled={isAddingToPortal}
+                          className={`inline-flex items-center gap-2 px-4 py-3 rounded-md transition-colors duration-200 ${currentInterest
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
                         >
-                          <BookmarkPlus className="h-4 w-4" />
-                          {currentInterest ? 'In Portal' : user ? 'Add to Portal' : 'Sign in to bookmark'}
+                          {isAddingToPortal ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <BookmarkPlus className="h-4 w-4" />
+                          )}
+                          {currentInterest ? 'In Portal' : (isAddingToPortal ? 'Saving...' : 'Save Job')}
                         </button>
                       </div>
                     )}
