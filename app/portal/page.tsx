@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { JobInterestCard } from "@/components/portal/JobInterestCard"
-import { AlertSection } from "@/components/portal/AlertSection"
-import { CoverageRateCard } from "@/components/portal/CoverageRateCard"
+import { StatsOverviewSection } from "@/components/portal/StatsOverviewSection"
 import { InterviewPrepSection } from "@/components/portal/InterviewPrepSection"
 import {
   getInterestsWithJobs,
@@ -144,10 +143,7 @@ export default function PortalPage() {
 
       <div className="px-2 md:px-16 py-8 space-y-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
-          <CoverageRateCard {...coverageRate} />
-          <AlertSection alerts={alerts} />
-        </div>
+        <StatsOverviewSection coverageRate={coverageRate} alerts={alerts} />
 
         {/* Applications Section */}
         <div className="bg-white rounded-md shadow-none md:shadow-sm border border-slate-200">
